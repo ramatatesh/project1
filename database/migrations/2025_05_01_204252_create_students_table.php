@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('gender');
             $table->string('grade');
             $table->string('section')->nullable();
+            $table->foreignId('classroom_id')->nullable()->constrained('classrooms')->cascadeOnDelete();
             $table->timestamps();
         });
     }

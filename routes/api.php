@@ -30,5 +30,6 @@ Route::post('addNote', [NoteController::class, 'store'])->middleware('auth:sanct
 Route::post('updateNote/{id}', [NoteController::class, 'update'])->middleware('auth:sanctum');
 Route::delete('deleteNote/{id}', [NoteController::class, 'destroy'])->middleware('auth:sanctum');
 Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
+Route::post('getStudentsByGradeAndClassroom', [StudentController::class, 'getStudentsByGradeAndClassroom']);
 
 
