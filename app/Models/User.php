@@ -25,21 +25,7 @@ class User extends Authenticatable
         'father_name',
     ];
     protected $table = 'users';
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-//    protected $hidden = [
-//        'password',
-//        'remember_token',
-//    ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -63,6 +49,15 @@ return $this->hasMany(Student::class);
     {
         return $this->hasMany(Admain::class);
     }
+
+    public function admain()
+{
+    return $this->hasOne(Admain::class);
+}
+public function student()
+{
+    return $this->hasOne(Student::class);
+}
 
 
     public function sendPasswordResetNotification($token)

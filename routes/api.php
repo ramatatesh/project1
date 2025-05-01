@@ -5,6 +5,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\NoteController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,5 +25,10 @@ Route::post('addAdmain',[AdmainController::class,'addAdmain']);
 Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
 Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
 
+Route::get('studentsByGrade/{grade}', [StudentController::class, 'studentsByGrade']);
+Route::post('addNote', [NoteController::class, 'store'])->middleware('auth:sanctum');
+Route::post('updateNote/{id}', [NoteController::class, 'update'])->middleware('auth:sanctum');
+Route::delete('deleteNote/{id}', [NoteController::class, 'destroy'])->middleware('auth:sanctum');
+Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
 
-// test
+
