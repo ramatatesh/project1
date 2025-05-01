@@ -27,12 +27,17 @@ class EmployeeController extends Controller
         $employees = Employee::create([
             'user_id' => $user->id,
             'gender' => $validatedData['gender'],
-            'grade' => $validatedData['grade'],
+            'job' => $validatedData['job'],
         ]);
         return response()->json([
             'message'=>'User Registered Successfully',
             'User'=>$user,
             'employee' => $employees,
             201]);
+    }
+    //______________________________________________________________________________
+    public function showEmployee (){
+        $employees = Employee::with('user')->get();
+        return response()->json($employees, 200);
     }
 }

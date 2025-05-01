@@ -37,4 +37,6 @@ class TeacherController extends Controller
             'teacher' => $teacher,
             201]);
     }
+    //________________________________________________________________________________________
+
 }
