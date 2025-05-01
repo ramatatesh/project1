@@ -17,20 +17,20 @@ class StudentController extends Controller
 
         $user = User::create([
             'username' => $validatedData['username'],
+            'father_name' => $validatedData['father_name'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
+            'phone' => $validatedData['phone'],
+            'address' => $validatedData['address'],
             'role' => 'student'
         ]);
 
         $student = Student::create([
             'user_id' => $user->id,
-            'father_name' => $validatedData['father_name'],
             'mother_name' => $validatedData['mother_name'],
             'birth_date' => $validatedData['birth_date'],
             'gender' => $validatedData['gender'],
-            'phone' => $validatedData['phone'],
             'grade' => $validatedData['grade'],
-            'address' => $validatedData['address']
         ]);
         return response()->json([
             'message'=>'User Registered Successfully',

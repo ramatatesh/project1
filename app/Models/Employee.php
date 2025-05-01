@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Employee extends Model
 {
     use HasFactory;
+    protected $fillable =['job','gender'];
+    protected $table = 'employees';
     public function user()
     {
         return $this->belongsTo(User::class);

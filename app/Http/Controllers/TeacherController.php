@@ -19,15 +19,15 @@ class TeacherController extends Controller
             'username' => $validatedData['username'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
+            'address' => $validatedData['address'],
+            'phone' => $validatedData['phone'],
             'role' => 'teacher'
         ]);
 
         $teacher = Teacher::create([
             'user_id' => $user->id,
             'gender' => $validatedData['gender'],
-            'phone' => $validatedData['phone'],
             'grade' => $validatedData['grade'],
-            'address' => $validatedData['address'],
             'specialization' => $validatedData['specialization'],
             'teaching_years' => $validatedData['teaching_years']
         ]);

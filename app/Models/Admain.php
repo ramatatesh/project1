@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Admain extends Model
 {
     use HasFactory;
-    protected $fillable = ['gender','phone','address','user_id','specialization','grade'];
+    protected $fillable = ['gender','user_id','specialization','grade'];
     protected $table = 'admains';
     public function user()
     {

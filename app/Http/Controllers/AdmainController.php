@@ -16,6 +16,9 @@ class AdmainController extends Controller
 
         $user = User::create([
             'username' => $validatedData['username'],
+            'father_name' => $validatedData['father_name'],
+            'phone' => $validatedData['phone'],
+            'address' => $validatedData['address'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
             'role' => 'admain'
@@ -24,9 +27,7 @@ class AdmainController extends Controller
         $admains = Admain::create([
             'user_id' => $user->id,
             'gender' => $validatedData['gender'],
-            'phone' => $validatedData['phone'],
             'grade' => $validatedData['grade'],
-            'address' => $validatedData['address'],
             'specialization' => $validatedData['specialization'],
         ]);
         return response()->json([
@@ -35,4 +36,5 @@ class AdmainController extends Controller
             'admain' => $admains,
             201]);
     }
+    //___________________________________________________________________________________
 }

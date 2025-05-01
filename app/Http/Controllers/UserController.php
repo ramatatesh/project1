@@ -137,4 +137,24 @@ class UserController extends Controller
             'user' => $user
         ]);
     }
+    //___________________________________________________________________________________
+    public function deleteUser(Request $request)
+    {
+        $request->validate([
+            'username' => 'required|string',
+            'father_name' => 'required|string',
+        ]);
+
+        $user = User::where('username', $request->username)
+            ->where('father_name', $request->father_name)
+            ->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found.'], 404);
+        }
+
+        $user->delete();
+
+        return response()->json(['message' => ' deleted successfully.'], 200);
+    }
 }

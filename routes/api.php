@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmainController;
+use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
@@ -16,6 +17,8 @@ Route::post('logout',[UserController::class,'logout'])->middleware('auth:sanctum
 Route::post('forgetPassword',[UserController::class,'forgetPassword']);
 Route::post('resetPassword',[UserController::class,'resetPassword']);
 Route::post('addStudent',[StudentController::class,'addStudent']);
-Route::put('updateAccount',[UserController::class,'updateAccount'])->middleware('auth:sanctum');
+Route::put('updateAccount',[UserController::class,'updateAccount']);
+Route::post('deleteUser',[UserController::class,'deleteUser']);
 Route::post('addTeacher',[TeacherController::class,'addTeacher']);
 Route::post('addAdmain',[AdmainController::class,'addAdmain']);
+Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
