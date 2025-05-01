@@ -22,6 +22,7 @@ Route::post('deleteUser',[UserController::class,'deleteUser']);
 Route::post('addTeacher',[TeacherController::class,'addTeacher']);
 Route::post('addAdmain',[AdmainController::class,'addAdmain']);
 Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
+Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
 
 
 // test
