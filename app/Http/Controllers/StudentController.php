@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreStudentRequest;
 use App\Models\Student;
 use App\Models\User;
+use App\Models\Note;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -39,6 +40,14 @@ class StudentController extends Controller
             201]);
     }
 //________________________________________________________________________________________
+//________________________________________________________________________________________
+    // تابع لجلب الطلاب حسب الشعبة
+    public function studentsByGrade($grade)
+    {
+        $students = Student::where('grade', $grade)->with('user:id,username')->get();
+
+        return response()->json($students);
+    }
 
 
 
