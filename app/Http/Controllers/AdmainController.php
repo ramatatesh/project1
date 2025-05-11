@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAdmainRequest;
+use App\Http\Requests\updateAdmainRequest;
 use App\Models\Admain;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -37,4 +38,36 @@ class AdmainController extends Controller
             201]);
     }
     //___________________________________________________________________________________
+    public function updateAdmain(updateAdmainRequest $request,$userId)
+    {
+        $validatedData = $request->validated();
+        $user = User::with('admain')->find($userId);
+
+        $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
+        $userData = [
+            'email' => $validatedData['email'] ?? null,
+            'phone' => $validatedData['phone'] ?? null,
+            'address' => $validatedData['address'] ?? null,
+            'username' => $validatedData['username'] ?? null,
+            'father_name' => $validatedData['father_name'] ?? null,
+            'password' => $password
+        ];
+        $admainData = [
+            'gender' => $validatedData['gender'] ?? null,
+            'grade' => $validatedData['grade'] ?? null,
+            'specialization' => $validatedData['specialization'] ?? null,
+        ];
+        $userData = array_filter($userData, fn($val) => !is_null($val));
+        $admainData = array_filter($admainData, fn($val) => !is_null($val));
+
+        $user->update($userData);
+        if (!$user->admain) {
+            return response()->json(['message' => 'لا يوجد سجل مشرف مرتبط بهذا المستخدم'], 404);
+        }
+        $user->teacher->update($admainData);
+
+        return response()->json(['message' => 'تم التحديث بنجاح',
+            'User'=>$user,
+            200]);
+    }
 }

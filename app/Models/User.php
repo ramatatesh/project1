@@ -33,22 +33,7 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
-    public function students(): HasMany
-    {
-return $this->hasMany(Student::class);
-    }
-    public function teachers(): HasMany
-    {
-        return $this->hasMany(Teacher::class);
-    }
-    public function admains(): HasMany
-    {
-        return $this->hasMany(Admain::class);
-    }
-    public function employees(): HasMany
-    {
-        return $this->hasMany(Admain::class);
-    }
+
 
     public function admain()
 {
@@ -58,7 +43,10 @@ public function student()
 {
     return $this->hasOne(Student::class);
 }
-
+    public function teacher()
+    {
+        return $this->hasOne(Teacher::class);
+    }
 
     public function sendPasswordResetNotification($token)
     {

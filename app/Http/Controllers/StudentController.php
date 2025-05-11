@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
+use App\Http\Requests\UpdateStudentRequest;
 use App\Models\Student;
 use App\Models\User;
 use App\Models\Note;
@@ -40,6 +41,39 @@ class StudentController extends Controller
             201]);
     }
 //________________________________________________________________________________________
+public function updateStudent(UpdateStudentRequest $request,$userId)
+{
+    $validatedData = $request->validated();
+    $user = User::with('student')->find($userId);
+
+    $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
+    $userData = [
+        'email' => $validatedData['email'] ?? null,
+        'phone' => $validatedData['phone'] ?? null,
+        'address' => $validatedData['address'] ?? null,
+       'username' => $validatedData['username'] ?? null,
+        'father_name' => $validatedData['father_name'] ?? null,
+        'password' => $password
+        ];
+    $studentData = [
+        'mother_name' => $validatedData['mother_name'] ?? null,
+        'birth_date' => $validatedData['birth_date'] ?? null,
+        'gender' => $validatedData['gender'] ?? null,
+        'grade' => $validatedData['grade'] ?? null,
+    ];
+    $userData = array_filter($userData, fn($val) => !is_null($val));
+    $studentData = array_filter($studentData, fn($val) => !is_null($val));
+
+    $user->update($userData);
+    if (!$user->student) {
+        return response()->json(['message' => 'لا يوجد سجل طالب مرتبط بهذا المستخدم'], 404);
+    }
+    $user->student->update($studentData);
+
+    return response()->json(['message' => 'تم التحديث بنجاح',
+        'User'=>$user,
+             200]);
+}
 //________________________________________________________________________________________
     // تابع لجلب الطلاب حسب الشعبة
     public function studentsByGrade($grade)

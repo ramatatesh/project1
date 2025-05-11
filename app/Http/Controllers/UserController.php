@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreStudentRequest;
 //use Dotenv\Validator;
+use App\Mail\SendCodeResetPassword;
+use App\Models\ResetCodePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use App\Models\Student;
+//use App\Mail\ResetCodePassword as ResetCodePasswordMail;
+
 
 class UserController extends Controller
 {
@@ -45,18 +50,18 @@ class UserController extends Controller
     }
     //________________________________________________________________________________________________________
 
-    public function forgetPassword(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
-
-        $status = Password::sendResetLink(
-            $request->only('email')
-        );
-
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => 'تم إرسال الرابط إلى بريدك الإلكتروني.'])
-            : response()->json(['message' => 'فشل في إرسال الرابط.'], 400);
-    }
+//    public function forgetPassword(Request $request)
+//    {
+//        $request->validate(['email' => 'required|email']);
+//
+//        $status = Password::sendResetLink(
+//            $request->only('email')
+//        );
+//
+//        return $status === Password::RESET_LINK_SENT
+//            ? response()->json(['message' => 'تم إرسال الرابط إلى بريدك الإلكتروني.'])
+//            : response()->json(['message' => 'فشل في إرسال الرابط.'], 400);
+//    }
 //___________________________________________________________________________________________________________
     public function resetPassword(Request $request)
     {
@@ -98,10 +103,8 @@ class UserController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        // الحصول على البيانات بعد التحقق
         $validated = $validator->validated();
 
-        // البحث عن المستخدم المطلوب
         $user = User::where('username', $validated['username'])
             ->where('email', $validated['email'])
             ->first();
@@ -156,5 +159,35 @@ class UserController extends Controller
         $user->delete();
 
         return response()->json(['message' => ' deleted successfully.'], 200);
+    }
+
+    public function forgetPassword(Request $request){
+        $data= $request->validate([
+            'email' => 'required|email|exists:users',
+        ]);
+        ResetCodePassword::query()->where('email',$request['email'])->delete();
+        $data['code']= mt_rand(100000,999999);
+        $codeData = ResetCodePassword::create($data);
+       // $codeData= ResetCodePassword::query()->create($data);
+        Mail::to($data['email'])->send(new SendCodeResetPassword($codeData['code']));
+
+      //  Mail::to($request['email'])->send(new ResetCodePassword($codeData['code']));
+        return response()->json(['message'=> trans('password.sent')]);
+    }
+
+    public function userCheckCode(Request $request)
+    {
+        $request->validate([
+            'code'=> 'required|string|exists:reset_code_passwords',
+        ]);
+        $passwordReset = ResetCodePassword::query()->firstWhere('code',$request['code']);
+        if ($passwordReset['created_at'] > now()->addHour()) {
+            $passwordReset->delete();
+            return response()->json(['message'=> trans('passwords.code_is_expire')],422);
+        }
+        return response()->json([
+            'code'=>$passwordReset['code'],
+            'message'=> trans('passwords.code_is_valid')
+        ],422);
     }
 }
