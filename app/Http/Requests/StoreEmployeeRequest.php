@@ -22,8 +22,6 @@ class StoreEmployeeRequest extends FormRequest
             'father_name'=>'required|string|max:255',
             'gender'=>'required|in:male,female',
             'phone'=>'required|string|min:10',
-            'email'=>'required|string|unique:users,email',
-            'password'=>'required|string|min:8',
             'address'=>'required|string',
             'job'=>'required|string',
         ];
