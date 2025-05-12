@@ -11,45 +11,47 @@ use Illuminate\Http\Request;
 class NoteController extends Controller
 {
       // تابع لإنشاء ملاحظة جديدة
-      public function store(Request $request)
+      public function storeNote(Request $request)
       {
-          $request->validate([
-              'student_id' => 'required|exists:students,id',
-              'content' => 'required|string|max:1000',
-          ]);
 
-          $user = auth()->user();
-
-          // تأكد أن المستخدم الحالي مشرف
-          if ($user->role !== 'admain') {
-              return response()->json(['message' => 'فقط المشرفين يمكنهم إرسال ملاحظات.'], 403);
-          }
-
-          // جيب سجل المشرف
-          $admain = $user->admain;
-
-          if (!$admain) {
-              return response()->json(['message' => 'حدث خطأ أثناء جلب بيانات المشرف.'], 500);
-          }
-
-          $note = Note::create([
-              'student_id' => $request->student_id,
-              'admain_id' => $admain->id,
-              'content' => $request->content,
-          ]);
-
-          return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
-      }
+    $request->validate([
+        'username' => 'required|string|max:255',
+        'father_name' => 'required|string|max:255',
+        'content' => 'required|string|max:1000',
+    ]);
 
 
-          //___________________________________________________________________
+    $user = User::where('username', $request->username)
+                ->where('father_name', $request->father_name)
+                ->first();
+
+
+    if (!$user) {
+        return response()->json(['message' => 'المستخدم غير موجود.'], 404);
+    }
+
+
+    $student = Student::where('user_id', $user->id)->first();
+
+
+    if (!$student) {
+        return response()->json(['message' => 'الطالب غير موجود.'], 404);
+    }
+
+    $note = Note::create([
+        'student_id' => $student->id,
+        'content' => $request->content,
+    ]);
+
+    return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
+}
+
+
+ //___________________________________________________________________
              //تابع لحذف الملاحظة
           public function destroy($id)
           {
-              $admain = auth()->user()->admain;
-              if (!$admain) {
-                  return response()->json(['message' => 'فقط المشرفين يمكنهم حذف الملاحظات.'], 403);
-              }
+
 
               $note = Note::find($id);
 
@@ -57,9 +59,6 @@ class NoteController extends Controller
                   return response()->json(['message' => 'الملاحظة غير موجودة.'], 404);
               }
 
-              if ($note->admain_id !== $admain->id) {
-                  return response()->json(['message' => 'غير مصرح لك بحذف هذه الملاحظة.'], 403);
-              }
 
               $note->delete();
 
@@ -75,10 +74,6 @@ class NoteController extends Controller
               'content' => 'required|string|max:1000',
           ]);
 
-          $admain = auth()->user()->admain;
-          if (!$admain) {
-              return response()->json(['message' => 'فقط المشرفين يمكنهم تعديل الملاحظات.'], 403);
-          }
 
           $note = Note::find($id);
 
@@ -86,9 +81,6 @@ class NoteController extends Controller
               return response()->json(['message' => 'الملاحظة غير موجودة.'], 404);
           }
 
-          if ($note->admain_id !== $admain->id) {
-              return response()->json(['message' => 'غير مصرح لك بتعديل هذه الملاحظة.'], 403);
-          }
 
           $note->update([
               'content' => $request->content,
@@ -97,28 +89,26 @@ class NoteController extends Controller
           return response()->json(['message' => 'تم تعديل الملاحظة بنجاح', 'note' => $note]);
       }
 
-          //___________________________________________________________________
-
-
-
        //___________________________________________________________________
 
        //تابع لجلب جميع ملاحظات طالب معين
       public function allnoteStudent()
       {
-          // جلب الطالب الذي ينتمي للمستخدم المصادق
+
           $student = auth()->user()->student;
 
           if (!$student) {
               return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
           }
 
-          // جلب ملاحظات الطالب بناءً على الـ student_id
+
           $notes = Note::where('student_id', $student->id)
-              ->with('admain.user:id,username') // جيب اسم المشرف يلي كتب الملاحظة
               ->latest()
               ->get();
 
           return response()->json($notes);
       }
+
+ //___________________________________________________________________
+
 }

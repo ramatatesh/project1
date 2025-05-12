@@ -6,6 +6,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\NoteController;
+use App\Http\Controllers\WeeklyScheduleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -26,10 +27,10 @@ Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
 Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
 
 Route::get('studentsByGrade/{grade}', [StudentController::class, 'studentsByGrade']);
-Route::post('addNote', [NoteController::class, 'store'])->middleware('auth:sanctum');
-Route::post('updateNote/{id}', [NoteController::class, 'update'])->middleware('auth:sanctum');
-Route::delete('deleteNote/{id}', [NoteController::class, 'destroy'])->middleware('auth:sanctum');
+Route::post('addNote', [NoteController::class, 'storeNote']);
+Route::post('updateNote/{id}', [NoteController::class, 'update']);
+Route::delete('deleteNote/{id}', [NoteController::class, 'destroy']);
 Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
 Route::post('getStudentsByGradeAndClassroom', [StudentController::class, 'getStudentsByGradeAndClassroom']);
-
-
+Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
+Route::post('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule']);

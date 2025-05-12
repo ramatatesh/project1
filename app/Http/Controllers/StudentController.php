@@ -110,14 +110,7 @@ public function getStudentsByGradeAndClassroom(Request $request)
 
 
 //________________________________________________________________________________________
-    // تابع لجلب الطلاب حسب الشعبة
-    public function studentsByGrade($grade)
-    {
-        $students = Student::where('grade', $grade)->with('user:id,username')->get();
-
-        return response()->json($students);
-    }
-
+    
 
 
 }
