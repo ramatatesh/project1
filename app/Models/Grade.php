@@ -7,5 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Grade extends Model
 {
-    use HasFactory;
+
+    protected $fillable = ['name'];
+
+    public function classrooms()
+{
+    return $this->hasMany(Classroom::class);
+}
+
 }
