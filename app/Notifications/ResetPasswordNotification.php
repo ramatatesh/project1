@@ -39,6 +39,7 @@ class ResetPasswordNotification extends Notification
         return (new MailMessage)
             ->subject('إعادة تعيين كلمة المرور')
             ->line('لقد طلبت إعادة تعيين كلمة المرور.')
+            ->line('رمز التحقق الخاص بك هو: ' . $this->token)
             ->action('إعادة تعيين كلمة المرور', $resetUrl)
             ->line('إذا لم تطلب هذا الإجراء، فلا حاجة لاتخاذ أي إجراء.');
     }

@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('mother_name');
             $table->string('birth_date');
             $table->string('gender');
-            $table->string('grade');
+            $table->foreignId('grade_id')->constrained('users')->cascadeOnDelete();;
             $table->string('section')->nullable();
             $table->foreignId('classroom_id')->nullable()->constrained('classrooms')->cascadeOnDelete();
             $table->timestamps();
