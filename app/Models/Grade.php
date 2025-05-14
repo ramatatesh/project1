@@ -25,4 +25,5 @@ public function weeklySchedules()
     return $this->hasMany(WeeklySchedule::class);
 }
 
+
 }

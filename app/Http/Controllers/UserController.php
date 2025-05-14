@@ -63,30 +63,28 @@ class UserController extends Controller
 //            : response()->json(['message' => 'فشل في إرسال الرابط.'], 400);
 //    }
 //___________________________________________________________________________________________________________
-    public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'token' => 'required',
-            'email' => 'required|email',
-            'password' => 'required|confirmed|min:8',
-        ]);
-
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) {
-                $user->forceFill([
-                    'password' => bcrypt($password)
-                ])->save();
-
-                // تسجيل الدخول مباشرة (اختياري)
-                // Auth::login($user);
-            }
-        );
-
-        return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => 'تم تغيير كلمة المرور بنجاح.'])
-            : response()->json(['message' => 'فشل التغيير.'], 400);
-    }
+//    public function resetPassword(Request $request)
+//    {
+//        $request->validate([
+//            'token' => 'required',
+//            'email' => 'required|email',
+//            'password' => 'required|confirmed|min:8',
+//        ]);
+//
+//        $status = Password::reset(
+//            $request->only('email', 'password', 'password_confirmation', 'token'),
+//            function ($user, $password) {
+//                $user->forceFill([
+//                    'password' => bcrypt($password)
+//                ])->save();
+//
+//            }
+//        );
+//
+//        return $status === Password::PASSWORD_RESET
+//            ? response()->json(['message' => 'تم تغيير كلمة المرور بنجاح.'])
+//            : response()->json(['message' => 'فشل التغيير.'], 400);
+//    }
     //_________________________________________________________________________________________
     public function UpdateAccount(Request $request)
     {
@@ -174,20 +172,58 @@ class UserController extends Controller
       //  Mail::to($request['email'])->send(new ResetCodePassword($codeData['code']));
         return response()->json(['message'=> trans('password.sent')]);
     }
-
+//__________________________________________________________________________________________
     public function userCheckCode(Request $request)
     {
         $request->validate([
             'code'=> 'required|string|exists:reset_code_passwords',
         ]);
-        $passwordReset = ResetCodePassword::query()->firstWhere('code',$request['code']);
-        if ($passwordReset['created_at'] > now()->addHour()) {
+
+        $passwordReset = ResetCodePassword::query()->firstWhere('code', $request['code']);
+
+        if ($passwordReset['created_at'] < now()->subHour()) {
             $passwordReset->delete();
-            return response()->json(['message'=> trans('passwords.code_is_expire')],422);
+            return response()->json(['message'=> trans('passwords.code_is_expire')], 422);
         }
+
         return response()->json([
-            'code'=>$passwordReset['code'],
-            'message'=> trans('passwords.code_is_valid')
-        ],422);
+            'email' => $passwordReset->email,
+            'code' => $passwordReset->code,
+            'message' => trans('passwords.code_is_valid')
+        ], 200);
     }
+
+    //______________________________________________________________________________________
+    public function resetPassword(Request $request)
+    {
+        $input = $request->validate([
+            'email' => 'required|email',
+            'code' => 'required|string|exists:reset_code_passwords,code',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $passwordReset = ResetCodePassword::query()
+            ->where('code', $input['code'])
+            ->where('email', $input['email'])
+            ->first();
+
+        if (!$passwordReset) {
+            return response()->json(['message' => trans('passwords.code_or_email_invalid')], 422);
+        }
+
+        if ($passwordReset->created_at < now()->subHour()) {
+            $passwordReset->delete();
+            return response()->json(['message'=> trans('passwords.code_is_expire')], 422);
+        }
+
+        $user = User::query()->firstWhere('email', $passwordReset->email);
+        $user->update([
+            'password' => bcrypt($input['password']),
+        ]);
+
+        $passwordReset->delete();
+
+        return response()->json(['message' => trans('passwords.reset_success')], 200);
+    }
+
 }
