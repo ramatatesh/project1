@@ -10,7 +10,9 @@ class Classroom extends Model
 
     protected $fillable = ['grade_id','name'];
 
-    public function students()
+
+    
+public function students()
 {
     return $this->hasMany(Student::class);
 }
@@ -18,6 +20,11 @@ class Classroom extends Model
 public function grade()
 {
     return $this->belongsTo(Grade::class);
+}
+
+public function weeklySchedules()
+{
+    return $this->hasMany(WeeklySchedule::class);
 }
 
 }

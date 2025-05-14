@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\WeeklySchedule;
+use App\Models\Grade;
+use App\Models\Classroom;
+use App\Models\Student;
 
 class WeeklyScheduleController extends Controller
 {
-    // تابع لادخال الجدول الاسبوعي
+
     public function storeWeeklySchedule(Request $request)
 {
     $validated = $request->validate([
@@ -24,10 +27,23 @@ class WeeklyScheduleController extends Controller
         'schedule.*.lesson_7' => 'nullable|string',
     ]);
 
+    $grade = Grade::where('name', $validated['grade'])->first();
+    if (!$grade) {
+        return response()->json(['message' => 'الصف غير موجود.',], 404);
+    }
+
+    $classroom = Classroom::where('grade_id', $grade->id)
+                        ->where('name', $validated['section'])
+                        ->first();
+
+    if (!$classroom) {
+        return response()->json(['message' => 'الشعبة غير موجودة.',], 404);
+    }
+
     foreach ($validated['schedule'] as $daySchedule) {
         WeeklySchedule::create([
-            'grade' => $validated['grade'],
-            'section' => $validated['section'],
+            'grade_id' => $grade->id,
+            'classroom_id' => $classroom->id,
             'day' => $daySchedule['day'],
             'lesson_1' => $daySchedule['lesson_1'],
             'lesson_2' => $daySchedule['lesson_2'],
@@ -47,32 +63,21 @@ class WeeklyScheduleController extends Controller
 
     // تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
     public function getWeeklySchedule(Request $request)
-    {
-
-        $validated = $request->validate([
-            'grade' => 'required|string',
-            'section' => 'required|string',
-        ]);
+{
+    $student = Student::where('user_id', auth()->id())->first();
 
 
-        $schedule = WeeklySchedule::where('grade', $validated['grade'])
-            ->where('section', $validated['section'])
-            ->get();
+    $schedule = WeeklySchedule::where('grade_id', $student->grade_id)
+        ->where('classroom_id', $student->classroom_id)
+        ->get();
 
 
-        if ($schedule->isEmpty()) {
-            return response()->json([
-                'message' => 'لا يوجد جدول أسبوعي لهذا الصف والشعبة.',
-            ], 404);
-        }
-
-
-        return response()->json([
-            'grade' => $validated['grade'],
-            'section' => $validated['section'],
-            'schedule' => $schedule,
-        ]);
-    }
+    return response()->json([
+        'grade' => $student->grade,
+        'section' => $student->section,
+        'schedule' => $schedule,
+    ]);
+}
 
 //________________________________________________________________________________________
 }

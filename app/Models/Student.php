@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Student extends Model
 {
     use HasFactory;
-    protected $fillable = ['mother_name','gender','dob','user_id','birth_date','grade','classroom_id',
+    protected $fillable = ['mother_name','gender','dob','user_id','birth_date','grade_id','classroom_id',
     'section'];
     protected $table = 'students';
     public function user()
@@ -17,8 +17,13 @@ class Student extends Model
     }
 
     public function classroom()
-{
+    {
     return $this->belongsTo(Classroom::class);
-}
+    }
+
+    public function grade()
+    {
+    return $this->belongsTo(Grade::class);
+    }
 
 }
