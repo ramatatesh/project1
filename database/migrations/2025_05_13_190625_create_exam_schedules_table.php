@@ -11,12 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('admains', function (Blueprint $table) {
+        Schema::create('exam_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
-            $table->string('gender');
-            $table->string('specialization');
-            $table->string('grade');
+            $table->foreignId('grade_id')->unique()->constrained();
             $table->timestamps();
         });
     }
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('admains');
+        Schema::dropIfExists('exam_schedules');
     }
 };
