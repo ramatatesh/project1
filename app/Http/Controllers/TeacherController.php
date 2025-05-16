@@ -31,7 +31,8 @@ class TeacherController extends Controller
             'gender' => $validatedData['gender'],
             'grade' => $validatedData['grade'],
             'specialization' => $validatedData['specialization'],
-            'teaching_years' => $validatedData['teaching_years']
+            'start_date' => $validatedData['start_date'],
+            'subject_id'=>$validatedData['subject_id'],
         ]);
         return response()->json([
             'message'=>'User Registered Successfully',
@@ -72,5 +73,14 @@ class TeacherController extends Controller
         return response()->json(['message' => 'تم التحديث بنجاح',
             'User'=>$user,
             200]);
+    }
+    //______________________________________________________________________________________________________
+    public function destroyTeacher($id){
+        $teacher= Teacher::find($id);
+        if (!$teacher) {
+            return response()->json(['message' => 'المعلم غير موجود'], 404);
+        }
+        $teacher->delete();
+        return response()->json(['message' => ' deleted successfully.'], 204);
     }
 }

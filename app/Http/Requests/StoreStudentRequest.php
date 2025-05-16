@@ -30,7 +30,7 @@ class StoreStudentRequest extends FormRequest
             'phone'=>'required|string|min:10',
             'email'=>'required|string|unique:users,email',
             'password'=>'required|string|min:8',
-            'grade_id'=>'required|string',
+            'grade'=>'required|string',
             'address'=>'required|string'
         ];
     }
