@@ -25,6 +25,7 @@ Route::post('addStudent',[StudentController::class,'addStudent']);
 Route::get('getGrades', [GradeController::class, 'getGrades']);
 Route::post('updateStudent/{userId}',[StudentController::class,'updateStudent']);
 Route::delete('destroyStudent/{userId}',[StudentController::class,'destroyStudent']);
+Route::post('showStudent',[StudentController::class,'showStudent'])->middleware('auth:sanctum');;
 Route::put('updateAccount',[UserController::class,'updateAccount']);
 Route::post('deleteUser',[UserController::class,'deleteUser']);
 Route::post('addTeacher',[TeacherController::class,'addTeacher']);

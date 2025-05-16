@@ -156,10 +156,41 @@ public function getStudentsByGradeAndClassroom(Request $request)
             200]);
     }
 //____________________________________________________________________________________________________
-    public function destroyStudent($id){
-        $task= Student::find($id);
-        $task->delete();
-        return response()->json(['message' => ' deleted successfully.'], 204);
+    public function destroyStudent($id)
+    {
+        $student = Student::find($id);
+
+        if (!$student) {
+            return response()->json(['message' => 'الطالب غير موجود'], 404);
+        }
+
+        $user = $student->user;
+        if ($user) {
+            $user->delete();
+        } else {
+            $student->delete();
+        }
+        return response()->json(['message' => 'تم حذف الطالب والمستخدم بنجاح.'], 204);
+    }
+
+//___________________________________________________________________________________________________________________
+    public function showStudent(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(["message" => "User not authenticated"], 401);
+        }
+
+        $student = Student::with('user')->where('user_id', $user->id)->first();
+        if (!$student) {
+            return response()->json(["message" => "الطالب غير موجود"], 404);
+        }
+
+        return response()->json([
+            'message' => 'تم جلب بيانات الطالب بنجاح',
+            'student' => $student
+        ], 200);
     }
 
 }
