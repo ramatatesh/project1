@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\WeeklyScheduleImport;
 use App\Models\WeeklySchedule;
 use App\Models\Grade;
 use App\Models\Classroom;
@@ -10,26 +12,18 @@ use App\Models\Student;
 
 class WeeklyScheduleController extends Controller
 {
-
-    public function storeWeeklySchedule(Request $request)
+// تابع لانشاء جدول اسبوعي
+public function storeWeeklySchedule(Request $request)
 {
     $validated = $request->validate([
         'grade' => 'required|string',
         'section' => 'required|string',
-        'schedule' => 'required|array|min:1',
-        'schedule.*.day' => 'required|string',
-        'schedule.*.lesson_1' => 'required|string',
-        'schedule.*.lesson_2' => 'required|string',
-        'schedule.*.lesson_3' => 'required|string',
-        'schedule.*.lesson_4' => 'required|string',
-        'schedule.*.lesson_5' => 'required|string',
-        'schedule.*.lesson_6' => 'required|string',
-        'schedule.*.lesson_7' => 'nullable|string',
+        'file' => 'required|file|mimes:xlsx,xls',
     ]);
 
     $grade = Grade::where('name', $validated['grade'])->first();
     if (!$grade) {
-        return response()->json(['message' => 'الصف غير موجود.',], 404);
+        return response()->json(['message' => 'الصف غير موجود.'], 404);
     }
 
     $classroom = Classroom::where('grade_id', $grade->id)
@@ -37,40 +31,31 @@ class WeeklyScheduleController extends Controller
                         ->first();
 
     if (!$classroom) {
-        return response()->json(['message' => 'الشعبة غير موجودة.',], 404);
+        return response()->json(['message' => 'الشعبة غير موجودة.'], 404);
     }
 
-    foreach ($validated['schedule'] as $daySchedule) {
-        WeeklySchedule::create([
-            'grade_id' => $grade->id,
-            'classroom_id' => $classroom->id,
-            'day' => $daySchedule['day'],
-            'lesson_1' => $daySchedule['lesson_1'],
-            'lesson_2' => $daySchedule['lesson_2'],
-            'lesson_3' => $daySchedule['lesson_3'],
-            'lesson_4' => $daySchedule['lesson_4'],
-            'lesson_5' => $daySchedule['lesson_5'],
-            'lesson_6' => $daySchedule['lesson_6'],
-            'lesson_7' => $daySchedule['lesson_7'] ?? null,
-        ]);
-    }
+    Excel::import(new WeeklyScheduleImport($validated['grade'], $validated['section']), $request->file('file'));
 
-    return response()->json([
-        'message' => 'تم حفظ الجدول الأسبوعي بنجاح.'
-    ], 201);
+    return response()->json(['message' => 'تم حفظ الجدول الأسبوعي بنجاح .'], 201);
 }
+
 //________________________________________________________________________________________
 
-    // تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
-    public function getWeeklySchedule(Request $request)
+// تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
+
+public function getWeeklySchedule(Request $request)
 {
     $student = Student::where('user_id', auth()->id())->first();
 
+    $query = WeeklySchedule::where('grade_id', $student->grade_id)
+        ->where('classroom_id', $student->classroom_id);
 
-    $schedule = WeeklySchedule::where('grade_id', $student->grade_id)
-        ->where('classroom_id', $student->classroom_id)
-        ->get();
 
+    if ($request->has('day')) {
+        $query->where('day', $request->day);
+    }
+
+    $schedule = $query->get();
 
     return response()->json([
         'grade' => $student->grade,
