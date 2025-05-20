@@ -158,7 +158,7 @@ class UserController extends Controller
 
         return response()->json(['message' => ' deleted successfully.'], 200);
     }
-
+//_________________________________________________________________________________________
     public function forgetPassword(Request $request){
         $data= $request->validate([
             'email' => 'required|email|exists:users',

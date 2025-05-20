@@ -14,11 +14,6 @@ class StoreTeacherRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -31,7 +26,7 @@ class StoreTeacherRequest extends FormRequest
             'password'=>'required|string|min:8',
             'grade'=>'required|string',
             'address'=>'required|string',
-            'teaching_years'=>'required|integer'
+            'start_date'=>'required|integer'
         ];
     }
 }
