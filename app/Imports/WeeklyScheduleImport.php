@@ -38,4 +38,5 @@ class WeeklyScheduleImport implements ToModel, WithHeadingRow
             'lesson_7' => $row['lesson_7'] ?? null,
         ]);
     }
+
 }

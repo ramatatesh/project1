@@ -41,7 +41,7 @@ public function storeWeeklySchedule(Request $request)
 
 //________________________________________________________________________________________
 
-// تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
+ // تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
 
 public function getWeeklySchedule(Request $request)
 {
@@ -63,6 +63,35 @@ public function getWeeklySchedule(Request $request)
         'schedule' => $schedule,
     ]);
 }
+
+// public function getWeeklySchedule(Request $request)
+// {
+//     // جلب الطالب حسب التوكن
+//     $student = Student::where('user_id', auth()->id())->first();
+
+//     if (!$student) {
+//         return response()->json(['error' => 'الطالب غير موجود'], 404);
+//     }
+
+//     // الاستعلام الأساسي
+//     $query = WeeklySchedule::where('grade_id', $student->grade_id)
+//         ->where('classroom_id', $student->classroom_id);
+
+//     // فلترة حسب اليوم إذا موجود في الطلب
+//     if ($request->has('day') && $request->day) {
+//         $query->where('day', $request->day);
+//     }
+
+//     // تنفيذ الاستعلام
+//     $schedules = $query->get();
+
+//     // إرجاع النتيجة مع اسم الصف والشعبة
+//     return response()->json([
+//         'grade' => $student->grade?->name,
+// 'section' => $student->classroom?->name,
+//         'schedule' => $schedules,
+//     ]);
+// }
 
 //________________________________________________________________________________________
 }

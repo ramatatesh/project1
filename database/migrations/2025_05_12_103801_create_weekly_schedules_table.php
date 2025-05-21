@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('weekly_schedules', function (Blueprint $table) {
             $table->id();
             $table->foreignId('classroom_id')->constrained();
-            $table->string('grade');
-            $table->string('section');
+            $table->foreignId('grade_id')->constrained();
             $table->string('day');
             $table->string('lesson_1');
             $table->string('lesson_2');

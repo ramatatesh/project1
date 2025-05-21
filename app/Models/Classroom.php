@@ -21,15 +21,17 @@ public function grade()
 {
     return $this->belongsTo(Grade::class);
 }
-    public function teachers()
-    {
-        return $this->belongsToMany(Teacher::class);
-    }
+
 
 public function weeklySchedules()
 {
     return $this->hasMany(WeeklySchedule::class);
 }
+
+ public function teachers()
+    {
+        return $this->belongsToMany(Teacher::class);
+    }
 
     public function files()
     {
