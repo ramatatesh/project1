@@ -10,22 +10,21 @@ class Grade extends Model
 
     protected $fillable = ['name'];
 
+
     public function classrooms()
-{
+    {
     return $this->hasMany(Classroom::class);
-}
-
-  public function students()
-    {
-        return $this->hasMany(Student::class);
     }
-
- public function weeklySchedules()
+    public function students()
     {
-        return $this->hasMany(WeeklySchedule::class);
+    return $this->hasMany(Student::class);
+    }
+    public function weeklySchedules()
+    {
+    return $this->hasMany(WeeklySchedule::class);
     }
     public function exam_schedule()
     {
-        return $this->hasOne(Exam_schedule::class);
+    return $this->hasOne(Exam_schedule::class);
     }
 }

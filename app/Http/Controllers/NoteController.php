@@ -17,6 +17,7 @@ class NoteController extends Controller
     $request->validate([
         'username' => 'required|string|max:255',
         'father_name' => 'required|string|max:255',
+        'day' => 'required|string',
         'content' => 'required|string|max:1000',
     ]);
 
@@ -41,6 +42,7 @@ class NoteController extends Controller
     $note = Note::create([
         'student_id' => $student->id,
         'content' => $request->content,
+        'day' => $request->day,
     ]);
 
     return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
