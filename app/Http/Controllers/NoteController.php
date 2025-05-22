@@ -18,6 +18,7 @@ class NoteController extends Controller
         'username' => 'required|string|max:255',
         'father_name' => 'required|string|max:255',
         'content' => 'required|string|max:1000',
+        'day' => 'required|string|max:255',
     ]);
 
     $user = User::where('username', $request->username)
@@ -37,6 +38,7 @@ class NoteController extends Controller
     $note = Note::create([
         'student_id' => $student->id,
         'content' => $request->content,
+        'day'=> $request->day
     ]);
 
     return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
@@ -103,6 +105,7 @@ class NoteController extends Controller
                 return [
                     'id' => $note->id,
                     'content' => $note->content,
+                    'day' =>$note->day,
                     'created_at' => $note->created_at->format('Y-m-d'), // ← التاريخ بصيغة مبسطة
                 ];
             });
