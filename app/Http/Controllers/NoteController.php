@@ -17,23 +17,18 @@ class NoteController extends Controller
     $request->validate([
         'username' => 'required|string|max:255',
         'father_name' => 'required|string|max:255',
-        'day' => 'required|string',
         'content' => 'required|string|max:1000',
     ]);
-
 
     $user = User::where('username', $request->username)
                 ->where('father_name', $request->father_name)
                 ->first();
 
-
     if (!$user) {
         return response()->json(['message' => 'المستخدم غير موجود.'], 404);
     }
 
-
     $student = Student::where('user_id', $user->id)->first();
-
 
     if (!$student) {
         return response()->json(['message' => 'الطالب غير موجود.'], 404);
@@ -42,7 +37,6 @@ class NoteController extends Controller
     $note = Note::create([
         'student_id' => $student->id,
         'content' => $request->content,
-        'day' => $request->day,
     ]);
 
     return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
@@ -94,23 +88,26 @@ class NoteController extends Controller
        //___________________________________________________________________
 
        //تابع لجلب جميع ملاحظات طالب معين
-      public function allnoteStudent()
-      {
+    public function allnoteStudent()
+    {
+        $student = auth()->user()->student;
 
-          $student = auth()->user()->student;
+        if (!$student) {
+            return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
+        }
 
-          if (!$student) {
-              return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
-          }
+        $notes = Note::where('student_id', $student->id)
+            ->latest()
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'content' => $note->content,
+                    'created_at' => $note->created_at->format('Y-m-d'), // ← التاريخ بصيغة مبسطة
+                ];
+            });
 
-
-          $notes = Note::where('student_id', $student->id)
-              ->latest()
-              ->get();
-
-          return response()->json($notes);
-      }
-
- //___________________________________________________________________
+        return response()->json(['notes' => $notes]);
+    }
 
 }
