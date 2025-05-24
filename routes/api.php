@@ -42,7 +42,7 @@ Route::post('addNote', [NoteController::class, 'storeNote']);
 Route::post('updateNote/{id}', [NoteController::class, 'update']);
 Route::delete('deleteNote/{id}', [NoteController::class, 'destroy']);
 Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
-Route::post('getStudentsByGradeAndClassroom', [StudentController::class, 'getStudentsByGradeAndClassroom']);
+Route::get('getStudentsByGradeAndClassroom/{gradeName}/{sectionName}', [StudentController::class, 'getStudentsByGradeAndClassroom']);
 Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
 Route::get('getClassroomsByGrade/{gradeName}', [ClassroomController::class, 'getClassroomsByGrade']);

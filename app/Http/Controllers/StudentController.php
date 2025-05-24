@@ -90,20 +90,26 @@ public function addStudent(StoreStudentRequest $request)
 
 
 //________________________________________________________________________________________
-public function getStudentsByGradeAndClassroom(Request $request)
+
+public function getStudentsByGradeAndClassroom($gradeName, $sectionName)
 {
-    $validated = $request->validate([
-        'grade' => 'required|string',
-        'section' => 'required|string',
-    ]);
+    $grade = Grade::where('name', $gradeName)->first();
 
-
-    $grade = Grade::where('name', $validated['grade'])->first();
-
+    if (!$grade) {
+        return response()->json([
+            'message' => 'الصف غير موجود.',
+        ], 404);
+    }
 
     $classroom = Classroom::where('grade_id', $grade->id)
-        ->where('name', $validated['section'])
+        ->where('name', $sectionName)
         ->first();
+
+    if (!$classroom) {
+        return response()->json([
+            'message' => 'الشعبة غير موجودة لهذا الصف.',
+        ], 404);
+    }
 
     $students = Student::where('classroom_id', $classroom->id)
         ->with('user')
