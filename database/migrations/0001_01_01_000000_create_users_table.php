@@ -15,12 +15,14 @@ return new class extends Migration
             $table->id();
             $table->string('username');
             $table->string('father_name');
+            $table->string('mother_name');
             $table->string('role');
             $table->string('phone');
             $table->string('address');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at');
             $table->string('password');
+            $table->enum('gender', ['male', 'female']);
             $table->rememberToken();
             $table->timestamps();
         });

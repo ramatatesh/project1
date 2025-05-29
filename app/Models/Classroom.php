@@ -25,7 +25,7 @@ public function grade()
 
 public function weeklySchedules()
 {
-    return $this->hasone(WeeklySchedule::class);
+    return $this->hasMany(WeeklySchedule::class);
 }
 
  public function teachers()

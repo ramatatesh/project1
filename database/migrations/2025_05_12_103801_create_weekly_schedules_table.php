@@ -13,16 +13,8 @@ return new class extends Migration
     {
         Schema::create('weekly_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('classroom_id')->constrained();
-            $table->foreignId('grade_id')->constrained();
-            $table->string('day');
-            $table->string('lesson_1');
-            $table->string('lesson_2');
-            $table->string('lesson_3');
-            $table->string('lesson_4');
-            $table->string('lesson_5');
-            $table->string('lesson_6');
-            $table->string('lesson_7')->nullable();
+            $table->foreignId('classroom_id')->constrained('classrooms')->cascadeOnDelete();
+            $table->string('semester');
             $table->timestamps();
         });
     }

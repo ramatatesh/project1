@@ -8,19 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class WeeklySchedule extends Model
 {
 
-    protected $fillable = [
-        'classroom_id', 'grade_id', 'day',
-        'lesson_1', 'lesson_2', 'lesson_3',
-        'lesson_4', 'lesson_5', 'lesson_6', 'lesson_7',
-    ];
-
-    public function grade()
-    {
-        return $this->belongsTo(Grade::class);
-    }
+   protected $fillable = ['classroom_id', 'semester'];
 
     public function classroom()
     {
         return $this->belongsTo(Classroom::class);
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class);
     }
 }
