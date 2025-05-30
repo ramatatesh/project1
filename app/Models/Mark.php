@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Mark extends Model
 {
     use HasFactory;
+
+
+    protected $fillable = ['student_id', 'subject_id', 'mark','type'];
+
     public function student()
     {
         return $this->belongsTo(Student::class);

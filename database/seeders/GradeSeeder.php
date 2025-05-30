@@ -13,9 +13,9 @@ class GradeSeeder extends Seeder
     {
 
         DB::table('grades')->upsert([
-            ['name' => 'العاشر'],
-            ['name' => 'الحادي عشر'],
-            ['name' => 'الثاني عشر'],
+            ['name' => '10'],
+            ['name' => '11 '],
+            ['name' => '12 '],
         ], ['name']);
     }
 }

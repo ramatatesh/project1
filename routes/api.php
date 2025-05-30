@@ -37,13 +37,13 @@ Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
 Route::post('updateEmployee/{userId}',[EmployeeController::class,'updateEmployee']);
 Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
 
-Route::get('studentsByGrade/{grade}', [StudentController::class, 'studentsByGrade']);
+//Route::get('studentsByGrade/{grade}', [StudentController::class, 'studentsByGrade']);
 Route::post('addNote', [NoteController::class, 'storeNote']);
 Route::post('updateNote/{id}', [NoteController::class, 'update']);
 Route::delete('deleteNote/{id}', [NoteController::class, 'destroy']);
 Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
-Route::post('getStudentsByGradeAndClassroom', [StudentController::class, 'getStudentsByGradeAndClassroom']);
+Route::get('getStudentsByGradeAndClassroom/{gradeName}/{sectionName}', [StudentController::class, 'getStudentsByGradeAndClassroom']);
 Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
-Route::post('getClassroomsByGrade', [ClassroomController::class, 'getClassroomsByGrade']);
+Route::get('getClassroomsByGrade/{gradeName}', [ClassroomController::class, 'getClassroomsByGrade']);
 

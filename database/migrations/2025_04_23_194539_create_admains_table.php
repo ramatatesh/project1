@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('admains', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
-            $table->string('gender');
             $table->string('specialization');
             $table->string('grade');
             $table->timestamps();

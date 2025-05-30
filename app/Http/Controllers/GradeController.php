@@ -9,10 +9,12 @@ class GradeController extends Controller
 {
     public function getGrades()
 {
+
     $grades = Grade::all();
 
     return response()->json([ 'grades' => $grades], 200);
 }
+
 
 //________________________________________________________________________________________
 }

@@ -8,8 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 class Exam_schedule extends Model
 {
     use HasFactory;
+
+    protected $fillable = ['grade_id','semester'];
+
     public function grade()
     {
         return $this->belongsTo(Grade::class);
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(Exam::class);
     }
 }

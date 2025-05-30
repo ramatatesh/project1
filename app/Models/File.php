@@ -9,6 +9,8 @@ class File extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['teacher_id','name'];
+
     public function classroom()
     {
         return $this->belongsToMany(Classroom::class);

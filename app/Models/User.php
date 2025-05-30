@@ -15,15 +15,8 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable,HasApiTokens;
 
-    protected $fillable = [
-        'username',
-        'email',
-        'password',
-        'role',
-        'phone',
-        'address',
-        'father_name',
-    ];
+    protected $fillable = ['username','father_name','mother_name','email','password',
+    'role','phone','address','gender'];
     protected $table = 'users';
 
     protected function casts(): array
@@ -36,13 +29,13 @@ class User extends Authenticatable
 
 
     public function admain()
-{
+    {
     return $this->hasOne(Admain::class);
-}
-public function student()
-{
+    }
+    public function student()
+    {
     return $this->hasOne(Student::class);
-}
+    }
     public function teacher()
     {
         return $this->hasOne(Teacher::class);
