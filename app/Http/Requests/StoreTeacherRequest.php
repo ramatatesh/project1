@@ -19,6 +19,7 @@ class StoreTeacherRequest extends FormRequest
         return [
             'username'=>'required|string|max:255',
             'father_name'=>'required|string|max:255',
+            'mother_name'=>'required|string|max:255',
             'specialization'=>'required|string',
             'gender'=>'required|in:male,female',
             'phone'=>'required|string|min:10',
@@ -26,7 +27,9 @@ class StoreTeacherRequest extends FormRequest
             'password'=>'required|string|min:8',
             'grade'=>'required|string',
             'address'=>'required|string',
-            'start_date'=>'required|integer'
+            'start_date'=>'required|string',
+            'subject_id' => 'required|exists:subjects,id'
+
         ];
     }
 }

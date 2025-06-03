@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->unique()->constrained('users')->cascadeOnDelete();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->string('specialization');
-            $table->integer('start_date');
+            $table->string('start_date');
             $table->timestamps();
         });
     }

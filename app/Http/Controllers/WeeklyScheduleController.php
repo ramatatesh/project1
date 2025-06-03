@@ -9,89 +9,120 @@ use App\Models\WeeklySchedule;
 use App\Models\Grade;
 use App\Models\Classroom;
 use App\Models\Student;
+use App\Models\Lesson;
 
 class WeeklyScheduleController extends Controller
 {
 // تابع لانشاء جدول اسبوعي
 public function storeWeeklySchedule(Request $request)
 {
-    $validated = $request->validate([
-        'grade' => 'required|string',
-        'section' => 'required|string',
-        'file' => 'required|file|mimes:xlsx,xls',
+    $request->validate([
+        'classroom_id' => 'required|exists:classrooms,id',
+        'semester' => 'required|string',
+        'lessons' => 'required|array',
+        'lessons.*.subject_id' => 'required|exists:subjects,id',
+        'lessons.*.teacher_id' => 'required|exists:teachers,id',
+        'lessons.*.day' => 'required|string',
+        'lessons.*.time' => 'required|string',
     ]);
 
-    $grade = Grade::where('name', $validated['grade'])->first();
-    if (!$grade) {
-        return response()->json(['message' => 'الصف غير موجود.'], 404);
+    //  التحقق من وجود جدول سابق لنفس الشعبة والفصل
+    $existingSchedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
+                                      ->where('semester', $request->semester)
+                                      ->first();
+
+    if ($existingSchedule) {
+        return response()->json([
+            'message' => 'يوجد بالفعل جدول أسبوعي لهذه الشعبة في هذا الفصل.',
+        ], 409);
     }
 
-    $classroom = Classroom::where('grade_id', $grade->id)
-                        ->where('name', $validated['section'])
-                        ->first();
+    //  التحقق من التكرار في اليوم والوقت ضمن نفس الطلب
+    $usedSlots = [];
 
-    if (!$classroom) {
-        return response()->json(['message' => 'الشعبة غير موجودة.'], 404);
+    foreach ($request->lessons as $lesson) {
+        $slotKey = $lesson['day'] . '_' . $lesson['time'];
+        if (isset($usedSlots[$slotKey])) {
+            return response()->json([
+                'message' => "لا يمكن تكرار نفس اليوم والوقت: {$lesson['day']} - {$lesson['time']}",
+            ], 422);
+        }
+        $usedSlots[$slotKey] = true;
     }
 
-    Excel::import(new WeeklyScheduleImport($validated['grade'], $validated['section']), $request->file('file'));
+    // إنشاء الجدول
+    $schedule = WeeklySchedule::create([
+        'classroom_id' => $request->classroom_id,
+        'semester' => $request->semester,
+    ]);
 
-    return response()->json(['message' => 'تم حفظ الجدول الأسبوعي بنجاح .'], 201);
+    foreach ($request->lessons as $lesson) {
+        Lesson::create([
+            'weekly_schedule_id' => $schedule->id,
+            'subject_id' => $lesson['subject_id'],
+            'teacher_id' => $lesson['teacher_id'],
+            'day' => $lesson['day'],
+            'time' => $lesson['time'],
+        ]);
+    }
+
+    return response()->json(['message' => 'تم إنشاء الجدول الأسبوعي بنجاح.'], 201);
 }
+
+
 
 //________________________________________________________________________________________
 
  // تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
-
 public function getWeeklySchedule(Request $request)
 {
-    $student = Student::where('user_id', auth()->id())->first();
+    // الطالب الحالي من التوكن
+    $student = auth()->user()->student;
 
-    $query = WeeklySchedule::where('grade_id', $student->grade_id)
-        ->where('classroom_id', $student->classroom_id);
-
-
-    if ($request->has('day')) {
-        $query->where('day', $request->day);
+    if (!$student) {
+        return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
     }
 
-    $schedule = $query->get();
+    // جلب الشعبة (classroom) المرتبط فيها الطالب
+    $classroom = $student->classroom;
+
+    if (!$classroom) {
+        return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
+    }
+
+    // جلب الجدول الأسبوعي المرتبط بهي الشعبة
+    $schedule = WeeklySchedule::where('classroom_id', $classroom->id)
+        ->with([
+            'lessons.subject:id,name',
+            'lessons.teacher.user:id,username'
+        ])
+        ->first();
+
+    if (!$schedule) {
+        return response()->json(['message' => 'لا يوجد جدول أسبوعي لهذه الشعبة.'], 404);
+    }
+
+    // تنظيم الدروس حسب الأيام
+    $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
+        return $lessons->map(function ($lesson) {
+            return [
+                'time' => $lesson->time,
+                'subject' => $lesson->subject->name ?? 'غير معروف',
+                'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
+            ];
+        })->sortBy('time')->values();
+    });
 
     return response()->json([
-        'grade' => $student->grade,
-        'section' => $student->section,
-        'schedule' => $schedule,
+        'student' => $student->user->username,
+        'classroom' => $classroom->name,
+        'grade' => $classroom->grade->name,
+        'semester' => $schedule->semester,
+        'weekly_schedule' => $grouped,
     ]);
 }
 
-// public function getWeeklySchedule(Request $request)
-// {
-//     // جلب الطالب حسب التوكن
-//     $student = Student::where('user_id', auth()->id())->first();
-
-//     if (!$student) {
-//         return response()->json(['error' => 'الطالب غير موجود'], 404);
-//     }
-
-//     // الاستعلام الأساسي
-//     $query = WeeklySchedule::where('grade_id', $student->grade_id)
-//         ->where('classroom_id', $student->classroom_id);
-
-//     // فلترة حسب اليوم إذا موجود في الطلب
-//     if ($request->has('day') && $request->day) {
-//         $query->where('day', $request->day);
-//     }
-
-//     // تنفيذ الاستعلام
-//     $schedules = $query->get();
-
-//     // إرجاع النتيجة مع اسم الصف والشعبة
-//     return response()->json([
-//         'grade' => $student->grade?->name,
-// 'section' => $student->classroom?->name,
-//         'schedule' => $schedules,
-//     ]);
-// }
-
 //________________________________________________________________________________________
+
 }
+

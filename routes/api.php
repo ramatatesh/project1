@@ -9,6 +9,7 @@ use App\Http\Controllers\NoteController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\WeeklyScheduleController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\SubjectController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -46,4 +47,6 @@ Route::get('getStudentsByGradeAndClassroom/{gradeName}/{sectionName}', [StudentC
 Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
 Route::get('getClassroomsByGrade/{gradeName}', [ClassroomController::class, 'getClassroomsByGrade']);
+Route::get('getSubject', [SubjectController::class, 'getSubject']);
+Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
 

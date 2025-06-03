@@ -7,11 +7,13 @@ use App\Http\Requests\UpdateTeacherRequest;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
 {
+    // تابع لاضافة معلم
     public function addTeacher(StoreTeacherRequest $request)
     {
         $validatedData = $request->validated();
@@ -19,6 +21,7 @@ class TeacherController extends Controller
         $user = User::create([
             'username' => $validatedData['username'],
             'father_name'=> $validatedData['father_name'],
+            'mother_name'=> $validatedData['mother_name'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
             'address' => $validatedData['address'],
@@ -41,6 +44,7 @@ class TeacherController extends Controller
             201]);
     }
     //________________________________________________________________________________________
+    // تابع لتعديل بيانات معلم
     public function updateTeacher(UpdateTeacherRequest $request,$userId)
     {
         $validatedData = $request->validated();
@@ -75,6 +79,7 @@ class TeacherController extends Controller
             200]);
     }
     //______________________________________________________________________________________________________
+   // تابع لحذف معلم
     public function destroyTeacher($id){
         $teacher= Teacher::find($id);
         if (!$teacher) {
@@ -83,4 +88,24 @@ class TeacherController extends Controller
         $teacher->delete();
         return response()->json(['message' => ' deleted successfully.'], 204);
     }
+
+    //____________________________________________________________________________________________
+
+
+    //تابع جلب المعلمين حسب المادة
+    public function getTeachersBySubject($subject_id)
+    {
+    $subject = Subject::with('teachers')->find($subject_id);
+
+    if (!$subject) {
+        return response()->json(['message' => 'المادة غير موجودة.'], 404);
+    }
+
+    return response()->json([
+        'subject' => $subject->name,
+        'teachers' => $subject->teachers,
+    ]);
+    }
+
+    //____________________________________________________________________________________________
 }

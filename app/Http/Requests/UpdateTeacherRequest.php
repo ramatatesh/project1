@@ -24,6 +24,7 @@ class UpdateTeacherRequest extends FormRequest
         return [
             'username'=>'nullable|string|max:255',
             'father_name'=>'nullable|string|max:255',
+            'mother_name'=>'nullable|string|max:255',
             'specialization'=>'nullable|string',
             'gender'=>'nullable|in:male,female',
             'phone'=>'nullable|string|min:10',
@@ -31,7 +32,7 @@ class UpdateTeacherRequest extends FormRequest
             'password'=>'nullable|string|min:8',
             'grade'=>'nullable|string',
             'address'=>'nullable|string',
-            'teaching_years'=>'nullable|integer'
+            'start_date'=>'nullable|string'
         ];
     }
 }
