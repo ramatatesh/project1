@@ -17,11 +17,16 @@ class AdmainController extends Controller
 
         $user = User::create([
             'username' => $validatedData['username'],
+            'first_name' => $validatedData['first_name'],
+            'last_name' => $validatedData['last_name'],
             'father_name' => $validatedData['father_name'],
             'phone' => $validatedData['phone'],
             'address' => $validatedData['address'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
+            'birth_date' => $validatedData['birth_date'],
+            'gender' => $validatedData['gender'],
+            'nationality' => $validatedData['nationality'],
             'role' => 'admain'
         ]);
 

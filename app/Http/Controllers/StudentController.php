@@ -29,13 +29,17 @@ public function addStudent(StoreStudentRequest $request)
 
     $user = User::create([
         'username' => $validatedData['username'],
+        'first_name' => $validatedData['first_name'],
+        'last_name' => $validatedData['last_name'],
         'father_name' => $validatedData['father_name'],
         'mother_name' => $validatedData['mother_name'],
         'email' => $validatedData['email'],
         'password' => Hash::make($validatedData['password']),
         'phone' => $validatedData['phone'],
         'address' => $validatedData['address'],
+        'birth_date' => $validatedData['birth_date'],
         'gender' => $validatedData['gender'],
+        'nationality' => $validatedData['nationality'],
         'role' => 'student'
     ]);
 
@@ -74,7 +78,6 @@ public function addStudent(StoreStudentRequest $request)
 
     $student = Student::create([
         'user_id' => $user->id,
-        'birth_date' => $validatedData['birth_date'],
         'grade_id' => $grade->id,
         'grade' => $validatedData['grade'],
         'classroom_id' => $targetClassroom->id,
@@ -139,14 +142,17 @@ public function getStudentsByGradeAndClassroom($gradeName, $sectionName)
             'phone' => $validatedData['phone'] ?? null,
             'address' => $validatedData['address'] ?? null,
             'username' => $validatedData['username'] ?? null,
+            'first_name' => $validatedData['first_name'] ?? null,
+            'last_name' => $validatedData['last_name'] ?? null,
             'father_name' => $validatedData['father_name'] ?? null,
+            'mother_name' => $validatedData['mother_name'] ?? null,
+            'gender' => $validatedData['gender'] ?? null,
+            'birth_date' => $validatedData['birth_date'] ?? null,
+            'nationality' => $validatedData['nationality'] ?? null,
             'password' => $password
         ];
         $studentData = [
-            'gender' => $validatedData['gender'] ?? null,
             'grade' => $validatedData['grade'] ?? null,
-            'mother_name' =>$validatedData['mother_name'] ?? null,
-            'birth_date' => $validatedData['birth_date'] ?? null,
         ];
         $userData = array_filter($userData, fn($val) => !is_null($val));
         $studentData = array_filter($studentData, fn($val) => !is_null($val));

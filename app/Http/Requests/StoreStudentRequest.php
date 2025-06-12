@@ -23,6 +23,8 @@ class StoreStudentRequest extends FormRequest
     {
         return [
             'username'=>'required|string|max:255',
+            'first_name'=>'required|string|max:255',
+            'last_name'=>'required|string|max:255',
             'father_name'=>'required|string|max:255',
             'mother_name'=>'required|string|max:255',
             'birth_date'=>'required|date|date_format:Y-m-d|before:today',
@@ -31,7 +33,8 @@ class StoreStudentRequest extends FormRequest
             'email'=>'required|string|unique:users,email',
             'password'=>'required|string|min:8',
             'grade'=>'required|string',
-            'address'=>'required|string'
+            'address'=>'required|string',
+            'nationality'=>'required|string'
         ];
     }
 }

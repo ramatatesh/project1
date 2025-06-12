@@ -20,19 +20,24 @@ class TeacherController extends Controller
 
         $user = User::create([
             'username' => $validatedData['username'],
+            'first_name' => $validatedData['first_name'],
+            'last_name' => $validatedData['last_name'],
             'father_name'=> $validatedData['father_name'],
             'mother_name'=> $validatedData['mother_name'],
             'email' => $validatedData['email'],
             'password' => Hash::make($validatedData['password']),
             'address' => $validatedData['address'],
             'phone' => $validatedData['phone'],
+            'birth_date' => $validatedData['birth_date'],
+            'gender' => $validatedData['gender'],
+            'nationality' => $validatedData['nationality'],
             'role' => 'teacher'
         ]);
 
         $teacher = Teacher::create([
             'user_id' => $user->id,
             'gender' => $validatedData['gender'],
-            'grade' => $validatedData['grade'],
+           // 'grade' => $validatedData['grade'],
             'specialization' => $validatedData['specialization'],
             'start_date' => $validatedData['start_date'],
             'subject_id'=>$validatedData['subject_id'],
@@ -56,14 +61,19 @@ class TeacherController extends Controller
             'phone' => $validatedData['phone'] ?? null,
             'address' => $validatedData['address'] ?? null,
             'username' => $validatedData['username'] ?? null,
+            'first_name' => $validatedData['first_name'] ?? null,
+            'last_name' => $validatedData['last_name'] ?? null,
             'father_name' => $validatedData['father_name'] ?? null,
+            'mother_name' => $validatedData['mother_name'] ?? null,
+            'birth_date' => $validatedData['birth_date'] ?? null,
+            'nationality' => $validatedData['nationality'] ?? null,
+            'gender' => $validatedData['gender'] ?? null,
             'password' => $password
         ];
         $teacherData = [
-            'gender' => $validatedData['gender'] ?? null,
             'grade' => $validatedData['grade'] ?? null,
             'specialization' => $validatedData['specialization'] ?? null,
-            'teaching_years' => $validatedData['teaching_years'] ?? null
+            'start_date' =>$validatedData['start_date'] ?? null,
         ];
         $userData = array_filter($userData, fn($val) => !is_null($val));
         $teacherData = array_filter($teacherData, fn($val) => !is_null($val));
