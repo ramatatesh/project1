@@ -38,7 +38,7 @@ Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
 Route::post('updateEmployee/{userId}',[EmployeeController::class,'updateEmployee']);
 Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
 
-//Route::get('studentsByGrade/{grade}', [StudentController::class, 'studentsByGrade']);
+
 Route::post('addNote', [NoteController::class, 'storeNote']);
 Route::post('updateNote/{id}', [NoteController::class, 'update']);
 Route::delete('deleteNote/{id}', [NoteController::class, 'destroy']);
@@ -49,4 +49,7 @@ Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySche
 Route::get('getClassroomsByGrade/{gradeName}', [ClassroomController::class, 'getClassroomsByGrade']);
 Route::get('getSubject', [SubjectController::class, 'getSubject']);
 Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
+Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
+Route::post('updateWeeklySchedule', [WeeklyScheduleController::class, 'updateWeeklySchedule']);
+Route::post('deleteWeeklySchedule', [WeeklyScheduleController::class, 'deleteWeeklySchedule']);
 

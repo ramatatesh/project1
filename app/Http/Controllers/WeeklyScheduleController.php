@@ -73,7 +73,7 @@ public function storeWeeklySchedule(Request $request)
 
 //________________________________________________________________________________________
 
- // تابع يعرض الجدول الأسبوعي بناءً على الصف والشعبة
+ // تابع يعرض الجدول الأسبوعي بناءً على توكن الطالب (للطالب)
 public function getWeeklySchedule(Request $request)
 {
     // الطالب الحالي من التوكن
@@ -83,45 +83,155 @@ public function getWeeklySchedule(Request $request)
         return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
     }
 
-    // جلب الشعبة (classroom) المرتبط فيها الطالب
+    // جلب الشعبة المرتبط فيها الطالب
     $classroom = $student->classroom;
 
     if (!$classroom) {
         return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
     }
 
-    // جلب الجدول الأسبوعي المرتبط بهي الشعبة
-    $schedule = WeeklySchedule::where('classroom_id', $classroom->id)
-        ->with([
-            'lessons.subject:id,name',
-            'lessons.teacher.user:id,username'
-        ])
-        ->first();
+    // جلب جميع الجداول المرتبطة بهي الشعبة
+    $schedules = WeeklySchedule::where('classroom_id', $classroom->id)
+        ->with(['lessons.subject:id,name', 'lessons.teacher.user:id,username'])
+        ->orderBy('semester') // ممكن تعدلي الترتيب حسب الحاجة
+        ->get();
 
-    if (!$schedule) {
-        return response()->json(['message' => 'لا يوجد جدول أسبوعي لهذه الشعبة.'], 404);
+    if ($schedules->isEmpty()) {
+        return response()->json(['message' => 'لا يوجد جداول أسبوعية لهذه الشعبة.'], 404);
     }
 
-    // تنظيم الدروس حسب الأيام
-    $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
-        return $lessons->map(function ($lesson) {
-            return [
-                'time' => $lesson->time,
-                'subject' => $lesson->subject->name ?? 'غير معروف',
-                'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
-            ];
-        })->sortBy('time')->values();
+    // تنظيم كل جدول حسب الأيام
+    $result = $schedules->map(function ($schedule) {
+        $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
+            return $lessons->map(function ($lesson) {
+                return [
+                    'time' => $lesson->time,
+                    'subject' => $lesson->subject->name ?? 'غير معروف',
+                    'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
+                ];
+            })->sortBy('time')->values();
+        });
+
+        return [
+            'semester' => $schedule->semester,
+            'weekly_schedule' => $grouped,
+        ];
     });
 
     return response()->json([
         'student' => $student->user->username,
         'classroom' => $classroom->name,
         'grade' => $classroom->grade->name,
-        'semester' => $schedule->semester,
-        'weekly_schedule' => $grouped,
+        'schedules' => $result,
     ]);
 }
 
+
+//________________________________________________________________________________________
+//تابع لعرض الجدول الاسبوعي بناء على الصف والشعبة و الفصل (للمشرف )
+
+public function showWeeklySchedule(Request $request)
+{
+    $request->validate([
+        'classroom_id' => 'required|exists:classrooms,id',
+        'semester' => 'required|string',
+    ]);
+
+
+    $classroom = Classroom::find($request->classroom_id);
+
+    $schedule = WeeklySchedule::with(['lessons.subject', 'lessons.teacher.user'])
+        ->where('classroom_id', $request->classroom_id)
+        ->where('semester', $request->semester)
+        ->first();
+
+    if (!$schedule) {
+        return response()->json(['message' => 'لا يوجد جدول أسبوعي لهذه الشعبة في هذا الفصل.'], 404);
+    }
+
+    $lessons = $schedule->lessons->map(function ($lesson) {
+        return [
+            'day' => $lesson->day,
+            'time' => $lesson->time,
+            'subject' => $lesson->subject->name ?? null,
+            'teacher' => $lesson->teacher->user->username ?? null,
+        ];
+    });
+
+    return response()->json([
+        'classroom' => $classroom->grade . ' / ' . $classroom->section,
+        'semester' => $request->semester,
+        'lessons' => $lessons,
+    ]);
+}
+//________________________________________________________________________________________
+// تابع لتعديل جدول اسبوعي
+public function updateWeeklySchedule(Request $request)
+{
+    $request->validate([
+        'classroom_id' => 'required|exists:classrooms,id',
+        'semester' => 'required|string',
+        'lessons' => 'sometimes|array',
+        'lessons.*.id' => 'required|exists:lessons,id',
+        'lessons.*.subject_id' => 'sometimes|exists:subjects,id',
+        'lessons.*.teacher_id' => 'sometimes|exists:teachers,id',
+        'lessons.*.day' => 'sometimes|string',
+        'lessons.*.time' => 'sometimes|string',
+    ]);
+
+    // نجيب الجدول باستخدام الشعبة والفصل
+    $schedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
+        ->where('semester', $request->semester)
+        ->first();
+
+    if (!$schedule) {
+        return response()->json(['message' => 'الجدول غير موجود'], 404);
+    }
+
+    // تعديل الدروس
+    if ($request->has('lessons')) {
+        foreach ($request->lessons as $lessonData) {
+            $lesson = Lesson::find($lessonData['id']);
+            if (!$lesson || $lesson->weekly_schedule_id != $schedule->id) {
+                continue;
+            }
+
+            $lesson->subject_id = $lessonData['subject_id'] ?? $lesson->subject_id;
+            $lesson->teacher_id = $lessonData['teacher_id'] ?? $lesson->teacher_id;
+            $lesson->day = $lessonData['day'] ?? $lesson->day;
+            $lesson->time = $lessonData['time'] ?? $lesson->time;
+            $lesson->save();
+        }
+    }
+
+    return response()->json(['message' => 'تم تعديل الجدول الأسبوعي بنجاح.']);
+}
+
+
+//________________________________________________________________________________________
+//تابع لحذف الجدول الاسبوعي
+
+public function deleteWeeklySchedule(Request $request)
+{
+    $request->validate([
+        'classroom_id' => 'required|exists:classrooms,id',
+        'semester' => 'required|string',
+    ]);
+
+    $schedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
+                              ->where('semester', $request->semester)
+                              ->first();
+
+    if (!$schedule) {
+        return response()->json(['message' => 'الجدول غير موجود.'], 404);
+    }
+
+    $schedule->lessons()->delete();
+
+    $schedule->delete();
+
+    return response()->json(['message' => 'تم حذف الجدول الأسبوعي بنجاح.'], 200);
+}
 //________________________________________________________________________________________
 
 }
