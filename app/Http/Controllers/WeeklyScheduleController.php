@@ -22,11 +22,8 @@ public function storeWeeklySchedule(Request $request)
         'lessons' => 'required|array',
         'lessons.*.subject_id' => 'required|exists:subjects,id',
         'lessons.*.teacher_id' => 'required|exists:teachers,id',
-        'lessons.*.day' => 'required|string',
-        'lessons.*.time' => 'required|string',
     ]);
 
-    //  التحقق من وجود جدول سابق لنفس الشعبة والفصل
     $existingSchedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
                                       ->where('semester', $request->semester)
                                       ->first();
@@ -37,32 +34,30 @@ public function storeWeeklySchedule(Request $request)
         ], 409);
     }
 
-    //  التحقق من التكرار في اليوم والوقت ضمن نفس الطلب
-    $usedSlots = [];
 
-    foreach ($request->lessons as $lesson) {
-        $slotKey = $lesson['day'] . '_' . $lesson['time'];
-        if (isset($usedSlots[$slotKey])) {
-            return response()->json([
-                'message' => "لا يمكن تكرار نفس اليوم والوقت: {$lesson['day']} - {$lesson['time']}",
-            ], 422);
-        }
-        $usedSlots[$slotKey] = true;
+    $days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+    $times = ['8:00', '8:45', '9:45', '10:30', '11:15', '12:15', '1:00'];
+
+
+    if (count($request->lessons) > count($days) * count($times)) {
+        return response()->json(['message' => 'عدد الحصص تجاوز الحد المسموح به (35).'], 422);
     }
 
-    // إنشاء الجدول
     $schedule = WeeklySchedule::create([
         'classroom_id' => $request->classroom_id,
         'semester' => $request->semester,
     ]);
 
-    foreach ($request->lessons as $lesson) {
+    foreach ($request->lessons as $index => $lesson) {
+        $dayIndex = floor($index / count($times));
+        $timeIndex = $index % count($times);
+
         Lesson::create([
             'weekly_schedule_id' => $schedule->id,
             'subject_id' => $lesson['subject_id'],
             'teacher_id' => $lesson['teacher_id'],
-            'day' => $lesson['day'],
-            'time' => $lesson['time'],
+            'day' => $days[$dayIndex],
+            'time' => $times[$timeIndex],
         ]);
     }
 
@@ -76,31 +71,30 @@ public function storeWeeklySchedule(Request $request)
  // تابع يعرض الجدول الأسبوعي بناءً على توكن الطالب (للطالب)
 public function getWeeklySchedule(Request $request)
 {
-    // الطالب الحالي من التوكن
+
     $student = auth()->user()->student;
 
     if (!$student) {
         return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
     }
 
-    // جلب الشعبة المرتبط فيها الطالب
+
     $classroom = $student->classroom;
 
     if (!$classroom) {
         return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
     }
 
-    // جلب جميع الجداول المرتبطة بهي الشعبة
     $schedules = WeeklySchedule::where('classroom_id', $classroom->id)
         ->with(['lessons.subject:id,name', 'lessons.teacher.user:id,username'])
-        ->orderBy('semester') // ممكن تعدلي الترتيب حسب الحاجة
+        ->orderBy('semester')
         ->get();
 
     if ($schedules->isEmpty()) {
         return response()->json(['message' => 'لا يوجد جداول أسبوعية لهذه الشعبة.'], 404);
     }
 
-    // تنظيم كل جدول حسب الأيام
+
     $result = $schedules->map(function ($schedule) {
         $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
             return $lessons->map(function ($lesson) {
@@ -179,7 +173,6 @@ public function updateWeeklySchedule(Request $request)
         'lessons.*.time' => 'sometimes|string',
     ]);
 
-    // نجيب الجدول باستخدام الشعبة والفصل
     $schedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
         ->where('semester', $request->semester)
         ->first();
@@ -188,7 +181,7 @@ public function updateWeeklySchedule(Request $request)
         return response()->json(['message' => 'الجدول غير موجود'], 404);
     }
 
-    // تعديل الدروس
+  
     if ($request->has('lessons')) {
         foreach ($request->lessons as $lessonData) {
             $lesson = Lesson::find($lessonData['id']);
