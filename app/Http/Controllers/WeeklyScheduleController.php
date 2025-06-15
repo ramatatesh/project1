@@ -19,10 +19,11 @@ public function storeWeeklySchedule(Request $request)
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
         'semester' => 'required|string',
-        'lessons' => 'required|array',
+        'lessons' => 'required|array|max:35',
         'lessons.*.subject_id' => 'required|exists:subjects,id',
         'lessons.*.teacher_id' => 'required|exists:teachers,id',
     ]);
+
 
     $existingSchedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
                                       ->where('semester', $request->semester)
@@ -35,30 +36,35 @@ public function storeWeeklySchedule(Request $request)
     }
 
 
-    $days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
-    $times = ['8:00', '8:45', '9:45', '10:30', '11:15', '12:15', '1:00'];
+    $days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
+    $times = ['08:00', '08:45', '09:45', '10:30', '11:15', '12:15', '13:00'];
 
-
-    if (count($request->lessons) > count($days) * count($times)) {
-        return response()->json(['message' => 'عدد الحصص تجاوز الحد المسموح به (35).'], 422);
-    }
 
     $schedule = WeeklySchedule::create([
         'classroom_id' => $request->classroom_id,
         'semester' => $request->semester,
     ]);
 
-    foreach ($request->lessons as $index => $lesson) {
-        $dayIndex = floor($index / count($times));
-        $timeIndex = $index % count($times);
 
-        Lesson::create([
-            'weekly_schedule_id' => $schedule->id,
-            'subject_id' => $lesson['subject_id'],
-            'teacher_id' => $lesson['teacher_id'],
-            'day' => $days[$dayIndex],
-            'time' => $times[$timeIndex],
-        ]);
+    $lessonIndex = 0;
+    foreach ($days as $day) {
+        foreach ($times as $time) {
+            if (!isset($request->lessons[$lessonIndex])) {
+                break 2;
+            }
+
+            $lessonData = $request->lessons[$lessonIndex];
+
+            Lesson::create([
+                'weekly_schedule_id' => $schedule->id,
+                'subject_id' => $lessonData['subject_id'],
+                'teacher_id' => $lessonData['teacher_id'],
+                'day' => $day,
+                'time' => $time,
+            ]);
+
+            $lessonIndex++;
+        }
     }
 
     return response()->json(['message' => 'تم إنشاء الجدول الأسبوعي بنجاح.'], 201);
@@ -181,7 +187,7 @@ public function updateWeeklySchedule(Request $request)
         return response()->json(['message' => 'الجدول غير موجود'], 404);
     }
 
-  
+
     if ($request->has('lessons')) {
         foreach ($request->lessons as $lessonData) {
             $lesson = Lesson::find($lessonData['id']);
