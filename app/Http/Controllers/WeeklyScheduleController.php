@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\WeeklyScheduleImport;
 use App\Models\WeeklySchedule;
@@ -77,13 +78,11 @@ public function storeWeeklySchedule(Request $request)
  // تابع يعرض الجدول الأسبوعي بناءً على توكن الطالب (للطالب)
 public function getWeeklySchedule(Request $request)
 {
-
     $student = auth()->user()->student;
 
     if (!$student) {
         return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
     }
-
 
     $classroom = $student->classroom;
 
@@ -100,14 +99,18 @@ public function getWeeklySchedule(Request $request)
         return response()->json(['message' => 'لا يوجد جداول أسبوعية لهذه الشعبة.'], 404);
     }
 
-
     $result = $schedules->map(function ($schedule) {
         $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
             return $lessons->map(function ($lesson) {
+                $subjectName = $lesson->subject->name ?? 'غير معروف';
+                $slug = Str::slug($subjectName, '_');
+                $imageUrl = asset("images/subjects/{$slug}.png");
+
                 return [
                     'time' => $lesson->time,
-                    'subject' => $lesson->subject->name ?? 'غير معروف',
+                    'subject' => $subjectName,
                     'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
+                    'image' => $imageUrl,
                 ];
             })->sortBy('time')->values();
         });
