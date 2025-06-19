@@ -15,30 +15,19 @@ class NoteController extends Controller
       {
 
     $request->validate([
-        'username' => 'required|string|max:255',
-        'father_name' => 'required|string|max:255',
+        'student_id' => 'required|exists:students,id',
         'content' => 'required|string|max:1000',
-        'day' => 'required|string|max:255',
     ]);
 
-    $user = User::where('username', $request->username)
-                ->where('father_name', $request->father_name)
-                ->first();
+          $student = Student::find($request->student_id);
 
-    if (!$user) {
-        return response()->json(['message' => 'المستخدم غير موجود.'], 404);
-    }
-
-    $student = Student::where('user_id', $user->id)->first();
-
-    if (!$student) {
-        return response()->json(['message' => 'الطالب غير موجود.'], 404);
-    }
+          if (!$student) {
+              return response()->json(['message' => 'الطالب غير موجود.'], 404);
+          }
 
     $note = Note::create([
         'student_id' => $student->id,
         'content' => $request->content,
-        'day'=> $request->day
     ]);
 
     return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
@@ -105,7 +94,6 @@ class NoteController extends Controller
                 return [
                     'id' => $note->id,
                     'content' => $note->content,
-                    'day' =>$note->day,
                     'created_at' => $note->created_at->format('Y-m-d'), // ← التاريخ بصيغة مبسطة
                 ];
             });
