@@ -19,7 +19,7 @@ public function storeWeeklySchedule(Request $request)
 {
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
-        'semester' => 'required|string',
+        'semester' => 'required|in:first,second',
         'lessons' => 'required|array|max:35',
         'lessons.*.subject_id' => 'required|exists:subjects,id',
         'lessons.*.teacher_id' => 'required|exists:teachers,id',
@@ -137,7 +137,7 @@ public function showWeeklySchedule(Request $request)
 {
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
-        'semester' => 'required|string',
+        'semester' => 'required|in:first,second',
     ]);
 
 
@@ -173,7 +173,7 @@ public function updateWeeklySchedule(Request $request)
 {
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
-        'semester' => 'required|string',
+        'semester' => 'required|in:first,second',
         'lessons' => 'sometimes|array',
         'lessons.*.id' => 'required|exists:lessons,id',
         'lessons.*.subject_id' => 'sometimes|exists:subjects,id',
@@ -217,7 +217,7 @@ public function deleteWeeklySchedule(Request $request)
 {
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
-        'semester' => 'required|string',
+        'semester' => 'required|in:first,second',
     ]);
 
     $schedule = WeeklySchedule::where('classroom_id', $request->classroom_id)

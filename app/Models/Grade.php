@@ -19,10 +19,7 @@ class Grade extends Model
     {
     return $this->hasMany(Student::class);
     }
-    // public function weeklySchedules()
-    // {
-    // return $this->hasMany(WeeklySchedule::class);
-    // }
+   
     public function exam_schedule()
     {
     return $this->hasOne(Exam_schedule::class);
