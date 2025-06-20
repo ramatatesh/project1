@@ -20,6 +20,7 @@ class AdmainController extends Controller
             'first_name' => $validatedData['first_name'],
             'last_name' => $validatedData['last_name'],
             'father_name' => $validatedData['father_name'],
+            'mother_name' => $validatedData['mother_name'],
             'phone' => $validatedData['phone'],
             'address' => $validatedData['address'],
             'email' => $validatedData['email'],
@@ -32,7 +33,6 @@ class AdmainController extends Controller
 
         $admains = Admain::create([
             'user_id' => $user->id,
-            'gender' => $validatedData['gender'],
             'grade' => $validatedData['grade'],
             'specialization' => $validatedData['specialization'],
         ]);
@@ -54,11 +54,16 @@ class AdmainController extends Controller
             'phone' => $validatedData['phone'] ?? null,
             'address' => $validatedData['address'] ?? null,
             'username' => $validatedData['username'] ?? null,
+            'first_name' => $validatedData['first_name'] ?? null,
+            'last_name' => $validatedData['last_name'] ?? null,
             'father_name' => $validatedData['father_name'] ?? null,
+            'mother_name' => $validatedData['mother_name'] ?? null,
+            'gender' => $validatedData['gender'] ?? null,
+            'birth_date' => $validatedData['birth_date'] ?? null,
+            'nationality' => $validatedData['nationality'] ?? null,
             'password' => $password
         ];
         $admainData = [
-            'gender' => $validatedData['gender'] ?? null,
             'grade' => $validatedData['grade'] ?? null,
             'specialization' => $validatedData['specialization'] ?? null,
         ];
@@ -69,10 +74,26 @@ class AdmainController extends Controller
         if (!$user->admain) {
             return response()->json(['message' => 'لا يوجد سجل مشرف مرتبط بهذا المستخدم'], 404);
         }
-        $user->teacher->update($admainData);
+        $user->admain->update($admainData);
 
         return response()->json(['message' => 'تم التحديث بنجاح',
             'User'=>$user,
             200]);
+    }
+    //__________________________________________________________________________________________________
+
+    public function destroyAdmin($id){
+        $admin= Admain::find($id);
+        if (!$admin) {
+            return response()->json(['message' => 'المشرف غير موجود'], 404);
+        }
+        $admin->delete();
+        return response()->json(['message' => ' deleted successfully.'], 204);
+    }
+    //__________________________________________________________________________________________________
+    public function getAdmin()
+    {
+        $admins = Admain::all();
+        return response()->json($admins);
     }
 }

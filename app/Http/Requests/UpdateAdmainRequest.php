@@ -23,7 +23,12 @@ class updateAdmainRequest extends FormRequest
     {
         return [
             'username'=>'nullable|string|max:255',
+            'first_name'=>'nullable|string|max:255',
+            'last_name'=>'nullable|string|max:255',
             'father_name'=>'nullable|string|max:255',
+            'mother_name'=>'nullable|string|max:255',
+            'birth_date'=>'nullable|date',
+            'nationality'=>'nullable|string|max:255',
             'specialization'=>'nullable|string',
             'gender'=>'nullable|in:male,female',
             'phone'=>'nullable|string|min:10',

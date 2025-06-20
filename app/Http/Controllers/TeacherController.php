@@ -36,8 +36,6 @@ class TeacherController extends Controller
 
         $teacher = Teacher::create([
             'user_id' => $user->id,
-            'gender' => $validatedData['gender'],
-           // 'grade' => $validatedData['grade'],
             'specialization' => $validatedData['specialization'],
             'start_date' => $validatedData['start_date'],
             'subject_id'=>$validatedData['subject_id'],
@@ -71,9 +69,9 @@ class TeacherController extends Controller
             'password' => $password
         ];
         $teacherData = [
-            'grade' => $validatedData['grade'] ?? null,
             'specialization' => $validatedData['specialization'] ?? null,
             'start_date' =>$validatedData['start_date'] ?? null,
+            'subject_id' => $validatedData['subject_id'] ?? null,
         ];
         $userData = array_filter($userData, fn($val) => !is_null($val));
         $teacherData = array_filter($teacherData, fn($val) => !is_null($val));
@@ -118,4 +116,10 @@ class TeacherController extends Controller
     }
 
     //____________________________________________________________________________________________
+
+    public function getTeacher()
+    {
+        $teachers = Teacher::all();
+        return response()->json($teachers);
+    }
 }
