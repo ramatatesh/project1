@@ -93,7 +93,7 @@ class AdmainController extends Controller
     //__________________________________________________________________________________________________
     public function getAdmin()
     {
-        $admins = Admain::all();
+        $admins = Admain::with('user')->get();
         return response()->json($admins);
     }
 }

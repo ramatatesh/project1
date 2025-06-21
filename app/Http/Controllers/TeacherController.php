@@ -119,7 +119,7 @@ class TeacherController extends Controller
 
     public function getTeacher()
     {
-        $teachers = Teacher::all();
+        $teachers = Teacher::with('user')->get();
         return response()->json($teachers);
     }
 }
