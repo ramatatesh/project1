@@ -10,6 +10,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\WeeklyScheduleController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\SubjectController;
+use App\Http\Controllers\MarkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -55,4 +56,6 @@ Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getT
 Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
 Route::post('updateWeeklySchedule', [WeeklyScheduleController::class, 'updateWeeklySchedule']);
 Route::post('deleteWeeklySchedule', [WeeklyScheduleController::class, 'deleteWeeklySchedule']);
-
+Route::post('storeMarks', [MarkController::class, 'storeMarks']);
+Route::get('getStudentMarks', [MarkController::class, 'getStudentMarks'])->middleware('auth:sanctum');
+Route::get('showStudentsWithMarks', [MarkController::class, 'showStudentsWithMarks']);
