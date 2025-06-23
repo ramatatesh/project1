@@ -21,10 +21,11 @@ public function storeWeeklySchedule(Request $request)
         'classroom_id' => 'required|exists:classrooms,id',
         'semester' => 'required|in:first,second',
         'lessons' => 'required|array|max:35',
-        'lessons.*.subject_id' => 'required|exists:subjects,id',
-        'lessons.*.teacher_id' => 'required|exists:teachers,id',
+        'lessons.*.day' => 'required|in:Sunday,Monday,Tuesday,Wednesday,Thursday',
+        'lessons.*.subjects' => 'required|array|max:7',
+        'lessons.*.subjects.*.subject_id' => 'required|exists:subjects,id',
+        'lessons.*.subjects.*.teacher_id' => 'required|exists:teachers,id',
     ]);
-
 
     $existingSchedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
                                       ->where('semester', $request->semester)
@@ -36,40 +37,38 @@ public function storeWeeklySchedule(Request $request)
         ], 409);
     }
 
-
-    $days = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'];
-    $times = ['08:00', '08:45', '09:45', '10:30', '11:15', '12:15', '13:00'];
-
-
     $schedule = WeeklySchedule::create([
         'classroom_id' => $request->classroom_id,
         'semester' => $request->semester,
     ]);
 
+    $times = ['08:00', '08:45', '09:45', '10:30', '11:15', '12:15', '13:00'];
 
-    $lessonIndex = 0;
-    foreach ($days as $day) {
-        foreach ($times as $time) {
-            if (!isset($request->lessons[$lessonIndex])) {
-                break 2;
+    foreach ($request->lessons as $dayBlock) {
+        $day = $dayBlock['day'];
+        $subjects = $dayBlock['subjects'];
+        $timeIndex = 0;
+
+        foreach ($subjects as $lesson) {
+            if (!isset($times[$timeIndex])) {
+                break; // عدد الحصص أكبر من الأوقات المسموحة
             }
-
-            $lessonData = $request->lessons[$lessonIndex];
 
             Lesson::create([
                 'weekly_schedule_id' => $schedule->id,
-                'subject_id' => $lessonData['subject_id'],
-                'teacher_id' => $lessonData['teacher_id'],
+                'subject_id' => $lesson['subject_id'],
+                'teacher_id' => $lesson['teacher_id'],
                 'day' => $day,
-                'time' => $time,
+                'time' => $times[$timeIndex],
             ]);
 
-            $lessonIndex++;
+            $timeIndex++;
         }
     }
 
     return response()->json(['message' => 'تم إنشاء الجدول الأسبوعي بنجاح.'], 201);
 }
+
 
 
 
