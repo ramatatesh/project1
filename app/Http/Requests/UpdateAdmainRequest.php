@@ -22,7 +22,8 @@ class updateAdmainRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'username'=>'nullable|string|max:255',
+            'email' => 'nullable|email|unique:users,email,' . $this->userId,
+            'username' => 'nullable|string|unique:users,username,' . $this->userId,
             'first_name'=>'nullable|string|max:255',
             'last_name'=>'nullable|string|max:255',
             'father_name'=>'nullable|string|max:255',
@@ -32,7 +33,6 @@ class updateAdmainRequest extends FormRequest
             'specialization'=>'nullable|string',
             'gender'=>'nullable|in:male,female',
             'phone'=>'nullable|string|min:10',
-            'email'=>'nullable|string|unique:users,email',
             'password'=>'nullable|string|min:8',
             'grade'=>'nullable|string',
             'address'=>'nullable|string',

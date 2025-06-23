@@ -52,9 +52,21 @@ class TeacherController extends Controller
     {
         $validatedData = $request->validated();
         $user = User::with('teacher')->find($userId);
+        if (!$user) {
+            return response()->json(['message' => 'المستخدم غير موجود'], 404);
+        }
 
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
-        $userData = [
+        $userData = [];
+
+        if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
+            $userData['email'] = $validatedData['email'];
+        }
+
+        if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
+            $userData['username'] = $validatedData['username'];
+        }
+        $userData += [
             'email' => $validatedData['email'] ?? null,
             'phone' => $validatedData['phone'] ?? null,
             'address' => $validatedData['address'] ?? null,
@@ -68,6 +80,9 @@ class TeacherController extends Controller
             'gender' => $validatedData['gender'] ?? null,
             'password' => $password
         ];
+        if ($password) {
+            $userData['password'] = $password;
+        }
         $teacherData = [
             'specialization' => $validatedData['specialization'] ?? null,
             'start_date' =>$validatedData['start_date'] ?? null,
