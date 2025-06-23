@@ -23,7 +23,10 @@ class StoreAdmainRequest extends FormRequest
     {
         return [
             'username'=>'required|string|max:255',
+            'first_name'=>'required|string|max:255',
+            'last_name'=>'required|string|max:255',
             'father_name'=>'required|string|max:255',
+            'mother_name'=>'required|string|max:255',
             'specialization'=>'required|string',
             'gender'=>'required|in:male,female',
             'phone'=>'required|string|min:10',
@@ -31,6 +34,8 @@ class StoreAdmainRequest extends FormRequest
             'password'=>'required|string|min:8',
             'grade'=>'required|string',
             'address'=>'required|string',
+            'birth_date'=>'required|date',
+            'nationality'=>'required|string',
         ];
     }
 }
