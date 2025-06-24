@@ -9,31 +9,40 @@ use App\Models\Student;
 
 class MarkController extends Controller
 {
-    // تابع اضافة علامات لشعبة
-    public function storeMarks(Request $request)
+    // تابع لاضافة علامات الطلاب
+  public function storeMarks(Request $request)
 {
     $request->validate([
         'grade_id' => 'required|exists:grades,id',
         'classroom_id' => 'required|exists:classrooms,id',
         'subject_id' => 'required|exists:subjects,id',
         'semester' => 'required|in:first,second',
-        'type' => 'required|in:first_exam,second_exam,final',
+        'type' => 'required|in:first_exam,second_exam,final,quiz',
+        'max_mark' => 'required|numeric|min:0',
         'marks' => 'required|array',
         'marks.*.student_id' => 'required|exists:students,id',
-        'marks.*.mark' => 'nullable|string',
+        'marks.*.mark' => 'nullable|numeric',
     ]);
 
     foreach ($request->marks as $markData) {
         if ($markData['mark'] !== null && $markData['mark'] !== '') {
+            if ($markData['mark'] > $request->max_mark) {
+                return response()->json([
+                    'message' => 'العلامة المدخلة للطالب ID ' . $markData['student_id'] . ' أكبر من العلامة العظمى المسموح بها (' . $request->max_mark . ').'
+                ], 422);
+            }
+
             Mark::updateOrCreate(
                 [
                     'student_id' => $markData['student_id'],
                     'subject_id' => $request->subject_id,
                     'semester' => $request->semester,
                     'type' => $request->type,
+                    'max_mark' => $request->max_mark,
                 ],
                 [
                     'mark' => $markData['mark'],
+
                 ]
             );
         }
@@ -41,6 +50,7 @@ class MarkController extends Controller
 
     return response()->json(['message' => 'تم حفظ العلامات بنجاح'], 200);
 }
+
 
 //_________________________________________________________________________________
 // تابع عرض علامات طالب معين حسب التوكن

@@ -15,9 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
-            $table->string('mark')->nullable();
+            $table->integer('mark')->nullable();
+            $table->integer('max_mark');
             $table->enum('semester', ['first', 'second']);
-            $table->enum('type', ['first_exam', 'second_exam', 'final']);
+            $table->enum('type', ['first_exam', 'second_exam', 'final','quiz']);
             $table->timestamps();
         });
     }
