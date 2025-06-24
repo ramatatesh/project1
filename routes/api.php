@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AdmainController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\InformationController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\StudentController;
@@ -41,6 +43,13 @@ Route::get('getAdmin',[AdmainController::class,'getAdmin']);
 Route::post('addEmployee',[EmployeeController::class,'addEmployee']);
 Route::post('updateEmployee/{userId}',[EmployeeController::class,'updateEmployee']);
 Route::get('showEmployee',[EmployeeController::class,'showEmployee']);
+Route::post('addInfo', [InformationController::class, 'storeInfo']);
+Route::get('getInfo', [InformationController::class, 'getInfo']);
+Route::post('updateInfo', [InformationController::class, 'updateInfo']);
+Route::post('addNews', [NewsController::class, 'storeNews']);
+Route::post('updateNews/{id}', [NewsController::class, 'updateNews']);
+Route::get('getNews', [NewsController::class, 'getNews'])->middleware('auth:sanctum');
+Route::delete('deleteNews/{id}', [NewsController::class, 'deleteNews']);
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);

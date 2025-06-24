@@ -134,7 +134,29 @@ class TeacherController extends Controller
 
     public function getTeacher()
     {
-        $teachers = Teacher::with('user')->get();
-        return response()->json($teachers);
+        $teachers = Teacher::with(['user', 'subject:id,name'])->get();
+
+        $formatted = $teachers->map(function ($teacher) {
+            return [
+                'id' => $teacher->id,
+                'username' => $teacher->user->username,
+                'first_name' => $teacher->user->first_name,
+                'last_name' => $teacher->user->last_name,
+                'father_name' => $teacher->user->father_name,
+                'mother_name' => $teacher->user->mother_name,
+                'gender' => $teacher->user->gender,
+                'birth_date' => $teacher->user->birth_date,
+                'email' => $teacher->user->email,
+                'phone' => $teacher->user->phone,
+                'address' => $teacher->user->address,
+                'nationality' => $teacher->user->nationality,
+                'specialization' => $teacher->specialization,
+                'start_date' => $teacher->start_date,
+                'subject' => $teacher->subject ? $teacher->subject->name : null, // اسم المادة بدلًا من subject_id
+            ];
+        });
+
+        return response()->json($formatted);
     }
+
 }
