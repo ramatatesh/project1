@@ -70,7 +70,7 @@ Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middlew
 Route::get('getStudentsByGradeAndClassroom/{gradeId}/{sectionId}', [StudentController::class, 'getStudentsByGradeAndClassroom']);
 Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
-Route::get('getClassroomsByGrade/{gradeName}', [ClassroomController::class, 'getClassroomsByGrade']);
+Route::get('getClassroomsByGrade/{gradeId}', [ClassroomController::class, 'getClassroomsByGrade']);
 Route::get('getSubject', [SubjectController::class, 'getSubject']);
 Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
 Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
