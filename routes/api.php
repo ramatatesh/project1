@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmainController;
+use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\NewsController;
@@ -50,6 +51,11 @@ Route::post('addNews', [NewsController::class, 'storeNews']);
 Route::post('updateNews/{id}', [NewsController::class, 'updateNews']);
 Route::get('getNews', [NewsController::class, 'getNews'])->middleware('auth:sanctum');
 Route::delete('deleteNews/{id}', [NewsController::class, 'deleteNews']);
+Route::post('addComplaint', [ComplaintController::class, 'addComplaint'])->middleware('auth:sanctum');
+Route::post('updateComplaint/{id}', [ComplaintController::class, 'updateComplaint'])->middleware('auth:sanctum');
+Route::delete('deleteComplaint/{id}', [ComplaintController::class, 'deleteComplaint'])->middleware('auth:sanctum');
+Route::get('getComplaints', [ComplaintController::class, 'getComplaints'])->middleware('auth:sanctum');
+Route::get('getComplaintsByGrade/{gradeId}', [ComplaintController::class, 'getComplaintsByGrade']);
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);
