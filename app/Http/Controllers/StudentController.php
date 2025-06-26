@@ -94,42 +94,43 @@ public function addStudent(StoreStudentRequest $request)
 
 //________________________________________________________________________________________
 
-public function getStudentsByGradeAndClassroom($gradeName, $sectionName)
-{
-    $grade = Grade::where('name', $gradeName)->first();
+    public function getStudentsByGradeAndClassroom($gradeId, $classroomId)
+    {
+        $grade = Grade::find($gradeId);
 
-    if (!$grade) {
+        if (!$grade) {
+            return response()->json([
+                'message' => 'الصف غير موجود.',
+            ], 404);
+        }
+
+        $classroom = Classroom::where('id', $classroomId)
+            ->where('grade_id', $gradeId)
+            ->first();
+
+        if (!$classroom) {
+            return response()->json([
+                'message' => 'الشعبة غير موجودة لهذا الصف.',
+            ], 404);
+        }
+
+        $students = Student::where('classroom_id', $classroom->id)
+            ->with('user')
+            ->get();
+
+        if ($students->isEmpty()) {
+            return response()->json([
+                'message' => 'لا يوجد طلاب في هذا الصف وهذه الشعبة.',
+            ], 404);
+        }
+
         return response()->json([
-            'message' => 'الصف غير موجود.',
-        ], 404);
+            'grade' => $grade->name,
+            'section' => $classroom->name,
+            'students' => $students,
+        ]);
     }
 
-    $classroom = Classroom::where('grade_id', $grade->id)
-        ->where('name', $sectionName)
-        ->first();
-
-    if (!$classroom) {
-        return response()->json([
-            'message' => 'الشعبة غير موجودة لهذا الصف.',
-        ], 404);
-    }
-
-    $students = Student::where('classroom_id', $classroom->id)
-        ->with('user')
-        ->get();
-
-    if ($students->isEmpty()) {
-        return response()->json([
-            'message' => 'لا يوجد طلاب في هذا الصف وهذه الشعبة.',
-        ], 404);
-    }
-
-    return response()->json([
-        'grade' => $grade->name,
-        'section' => $classroom->name,
-        'students' => $students,
-    ]);
-}
 //________________________________________________________________________________________
     public function updateStudent(UpdateStudentRequest $request, $userId)
     {

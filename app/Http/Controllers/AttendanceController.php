@@ -70,7 +70,7 @@ class AttendanceController extends Controller
 
     public function getStudentAbsences($studentId)
     {
-        $student = \App\Models\Student::find($studentId);
+        $student = Student::find($studentId);
 
         if (!$student) {
             return response()->json(['message' => 'الطالب غير موجود'], 404);
