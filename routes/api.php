@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmainController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\InformationController;
@@ -56,6 +57,10 @@ Route::post('updateComplaint/{id}', [ComplaintController::class, 'updateComplain
 Route::delete('deleteComplaint/{id}', [ComplaintController::class, 'deleteComplaint'])->middleware('auth:sanctum');
 Route::get('getComplaints', [ComplaintController::class, 'getComplaints'])->middleware('auth:sanctum');
 Route::get('getComplaintsByGrade/{gradeId}', [ComplaintController::class, 'getComplaintsByGrade']);
+Route::post('takeAbsences', [AttendanceController::class, 'takeAbsences']);
+Route::get('getAbsenceCountBySection', [AttendanceController::class, 'getAbsenceCountBySection']);
+Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getStudentAbsences']);
+Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);
