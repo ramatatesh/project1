@@ -48,59 +48,56 @@ class TeacherController extends Controller
     }
     //________________________________________________________________________________________
     // تابع لتعديل بيانات معلم
-    public function updateTeacher(UpdateTeacherRequest $request,$userId)
+    public function updateTeacher(UpdateTeacherRequest $request, $userId)
     {
         $validatedData = $request->validated();
+
         $user = User::with('teacher')->find($userId);
         if (!$user) {
             return response()->json(['message' => 'المستخدم غير موجود'], 404);
         }
 
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
-        $userData = [];
 
-        if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
-            $userData['email'] = $validatedData['email'];
-        }
-
-        if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
-            $userData['username'] = $validatedData['username'];
-        }
-        $userData += [
-            'email' => $validatedData['email'] ?? null,
-            'phone' => $validatedData['phone'] ?? null,
-            'address' => $validatedData['address'] ?? null,
-            'username' => $validatedData['username'] ?? null,
-            'first_name' => $validatedData['first_name'] ?? null,
-            'last_name' => $validatedData['last_name'] ?? null,
-            'father_name' => $validatedData['father_name'] ?? null,
-            'mother_name' => $validatedData['mother_name'] ?? null,
-            'birth_date' => $validatedData['birth_date'] ?? null,
-            'nationality' => $validatedData['nationality'] ?? null,
-            'gender' => $validatedData['gender'] ?? null,
-            'password' => $password
+        $userData = [
+            'email' => $validatedData['email'] ?? $user->email,
+            'username' => $validatedData['username'] ?? $user->username,
+            'phone' => $validatedData['phone'] ?? $user->phone,
+            'address' => $validatedData['address'] ?? $user->address,
+            'first_name' => $validatedData['first_name'] ?? $user->first_name,
+            'last_name' => $validatedData['last_name'] ?? $user->last_name,
+            'father_name' => $validatedData['father_name'] ?? $user->father_name,
+            'mother_name' => $validatedData['mother_name'] ?? $user->mother_name,
+            'gender' => $validatedData['gender'] ?? $user->gender,
+            'birth_date' => $validatedData['birth_date'] ?? $user->birth_date,
+            'nationality' => $validatedData['nationality'] ?? $user->nationality,
         ];
+
         if ($password) {
             $userData['password'] = $password;
         }
-        $teacherData = [
-            'specialization' => $validatedData['specialization'] ?? null,
-            'start_date' =>$validatedData['start_date'] ?? null,
-            'subject_id' => $validatedData['subject_id'] ?? null,
-        ];
-        $userData = array_filter($userData, fn($val) => !is_null($val));
-        $teacherData = array_filter($teacherData, fn($val) => !is_null($val));
 
-        $user->update($userData);
+        $teacherData = [
+            'specialization' => $validatedData['specialization'] ?? $user->teacher->specialization,
+            'start_date' => $validatedData['start_date'] ?? $user->teacher->start_date,
+            'subject_id' => $validatedData['subject_id'] ?? $user->teacher->subject_id,
+        ];
+
+        $user->update(array_filter($userData, fn($val) => !is_null($val)));
+
         if (!$user->teacher) {
             return response()->json(['message' => 'لا يوجد سجل معلم مرتبط بهذا المستخدم'], 404);
         }
-        $user->teacher->update($teacherData);
 
-        return response()->json(['message' => 'تم التحديث بنجاح',
-            'User'=>$user,
-            200]);
+        $user->teacher->update(array_filter($teacherData, fn($val) => !is_null($val)));
+
+        return response()->json([
+            'message' => 'تم التحديث بنجاح',
+            'User' => $user
+        ], 200);
     }
+
+
     //______________________________________________________________________________________________________
    // تابع لحذف معلم
     public function destroyTeacher($id){

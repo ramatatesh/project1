@@ -21,7 +21,6 @@ class UpdateStudentRequest extends FormRequest
             'birth_date'=>'sometimes|date|date_format:Y-m-d|before:today',
             'gender'=>'sometimes|in:male,female',
             'phone'=>'sometimes|string|min:10',
-            'email'=>'sometimes|string|email|unique:users,email',
             'password'=>'sometimes|string|min:8',
             'grade'=>'sometimes|string',
             'address'=>'sometimes|string'

@@ -59,7 +59,7 @@ Route::delete('deleteComplaint/{id}', [ComplaintController::class, 'deleteCompla
 Route::get('getComplaints', [ComplaintController::class, 'getComplaints'])->middleware('auth:sanctum');
 Route::get('getComplaintsByGrade/{gradeId}', [ComplaintController::class, 'getComplaintsByGrade']);
 Route::post('takeAbsences', [AttendanceController::class, 'takeAbsences']);
-Route::get('getAbsenceCountBySection', [AttendanceController::class, 'getAbsenceCountBySection']);
+Route::get('getAbsenceCountBySection/{grade_id}/{classroom_id}', [AttendanceController::class, 'getAbsenceCountBySection']);
 Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getStudentAbsences']);
 Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
 
