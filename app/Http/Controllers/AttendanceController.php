@@ -36,16 +36,12 @@ class AttendanceController extends Controller
     }
         //_________________________________________________________________________________________________
 
-        public function getAbsenceCountBySection(Request $request)
+        public function getAbsenceCountBySection($grade_id,$classroom_id)
     {
-        $request->validate([
-            'grade_id' => 'required|exists:grades,id',
-            'classroom_id' => 'required|exists:classrooms,id',
-        ]);
 
         $students = Student::with('user')
-            ->where('grade_id', $request->grade_id)
-            ->where('classroom_id', $request->classroom_id)
+            ->where($grade_id)
+            ->where($classroom_id)
             ->get();
 
         $data = $students->map(function ($student) {
@@ -61,8 +57,8 @@ class AttendanceController extends Controller
         });
 
         return response()->json([
-            'classroom_id' => $request->classroom_id,
-            'grade_id' => $request->grade_id,
+            'classroom_id' => $classroom_id,
+            'grade_id' => $grade_id,
             'students' => $data,
         ]);
     }
