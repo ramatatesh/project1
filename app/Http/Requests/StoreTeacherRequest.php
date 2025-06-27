@@ -29,7 +29,7 @@ class StoreTeacherRequest extends FormRequest
             'password'=>'required|string|min:8',
             'address'=>'required|string',
             'start_date'=>'required|date',
-            'subject_id' => 'required|exists:subjects,id',
+            'subject_name' => 'required|string|exists:subjects,name',
             'birth_date'=>'required|date',
             'nationality'=>'required|string',
 
