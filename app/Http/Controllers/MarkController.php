@@ -56,8 +56,7 @@ class MarkController extends Controller
 // تابع عرض علامات طالب معين حسب التوكن
 public function getStudentMarks()
 {
-
-     $student = auth()->user()->student;
+    $student = auth()->user()->student;
 
     if (!$student) {
         return response()->json(['message' => 'Unauthenticated'], 401);
@@ -65,7 +64,20 @@ public function getStudentMarks()
 
     $marks = Mark::with(['subject'])
                 ->where('student_id', $student->id)
-                ->get();
+                ->get()
+                ->map(function ($mark) {
+                    return [
+                        'id' => $mark->id,
+                        'subject_id' => $mark->subject_id,
+                        'student_id' => $mark->student_id,
+                        'mark' => $mark->mark,
+                        'max_mark' => $mark->max_mark,
+                        'semester' => $mark->semester,
+                        'type' => $mark->type,
+                        'created_at' => $mark->created_at->format('Y-m-d'),
+                        'subject' => $mark->subject,
+                    ];
+                });
 
     return response()->json(['marks' => $marks]);
 }

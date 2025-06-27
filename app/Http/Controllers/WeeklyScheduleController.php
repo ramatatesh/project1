@@ -25,6 +25,7 @@ public function storeWeeklySchedule(Request $request)
         'lessons.*.subjects' => 'required|array|max:7',
         'lessons.*.subjects.*.subject_id' => 'required|exists:subjects,id',
         'lessons.*.subjects.*.teacher_id' => 'required|exists:teachers,id',
+        'lessons.*.subjects.*.time' => 'required|date_format:H:i',
     ]);
 
     $existingSchedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
@@ -42,27 +43,18 @@ public function storeWeeklySchedule(Request $request)
         'semester' => $request->semester,
     ]);
 
-    $times = ['08:00', '08:45', '09:45', '10:30', '11:15', '12:15', '13:00'];
-
     foreach ($request->lessons as $dayBlock) {
         $day = $dayBlock['day'];
         $subjects = $dayBlock['subjects'];
-        $timeIndex = 0;
 
         foreach ($subjects as $lesson) {
-            if (!isset($times[$timeIndex])) {
-                break; // عدد الحصص أكبر من الأوقات المسموحة
-            }
-
             Lesson::create([
                 'weekly_schedule_id' => $schedule->id,
                 'subject_id' => $lesson['subject_id'],
                 'teacher_id' => $lesson['teacher_id'],
                 'day' => $day,
-                'time' => $times[$timeIndex],
+                'time' => $lesson['time'],
             ]);
-
-            $timeIndex++;
         }
     }
 
@@ -173,12 +165,11 @@ public function updateWeeklySchedule(Request $request)
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
         'semester' => 'required|in:first,second',
-        'lessons' => 'sometimes|array',
-        'lessons.*.id' => 'required|exists:lessons,id',
+        'lessons' => 'required|array',
+        'lessons.*.day' => 'required|in:Sunday,Monday,Tuesday,Wednesday,Thursday',
+        'lessons.*.time' => 'required|date_format:H:i',
         'lessons.*.subject_id' => 'sometimes|exists:subjects,id',
         'lessons.*.teacher_id' => 'sometimes|exists:teachers,id',
-        'lessons.*.day' => 'sometimes|string',
-        'lessons.*.time' => 'sometimes|string',
     ]);
 
     $schedule = WeeklySchedule::where('classroom_id', $request->classroom_id)
@@ -189,20 +180,19 @@ public function updateWeeklySchedule(Request $request)
         return response()->json(['message' => 'الجدول غير موجود'], 404);
     }
 
+    foreach ($request->lessons as $lessonData) {
+        $lesson = Lesson::where('weekly_schedule_id', $schedule->id)
+                        ->where('day', $lessonData['day'])
+                        ->where('time', $lessonData['time'])
+                        ->first();
 
-    if ($request->has('lessons')) {
-        foreach ($request->lessons as $lessonData) {
-            $lesson = Lesson::find($lessonData['id']);
-            if (!$lesson || $lesson->weekly_schedule_id != $schedule->id) {
-                continue;
-            }
-
-            $lesson->subject_id = $lessonData['subject_id'] ?? $lesson->subject_id;
-            $lesson->teacher_id = $lessonData['teacher_id'] ?? $lesson->teacher_id;
-            $lesson->day = $lessonData['day'] ?? $lesson->day;
-            $lesson->time = $lessonData['time'] ?? $lesson->time;
-            $lesson->save();
+        if (!$lesson) {
+            continue; 
         }
+
+        $lesson->subject_id = $lessonData['subject_id'] ?? $lesson->subject_id;
+        $lesson->teacher_id = $lessonData['teacher_id'] ?? $lesson->teacher_id;
+        $lesson->save();
     }
 
     return response()->json(['message' => 'تم تعديل الجدول الأسبوعي بنجاح.']);

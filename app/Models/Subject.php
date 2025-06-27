@@ -26,5 +26,10 @@ class Subject extends Model
     return $this->hasMany(Teacher::class);
     }
 
+    public function homeworks()
+    {
+    return $this->hasMany(Homework::class);
+    }
+
 
 }

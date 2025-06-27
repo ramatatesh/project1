@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Attendance extends Model
 {
     use HasFactory;
-    protected $fillable = ['student_id','status'];
-    
+    protected $fillable = ['classroom_id','student_id','status','date'];
+
     public function student()
     {
         return $this->belongsTo(Student::class);

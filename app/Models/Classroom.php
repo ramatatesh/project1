@@ -37,4 +37,9 @@ public function weeklySchedules()
     {
         return $this->belongsToMany(File::class);
     }
+
+    public function homeworks()
+    {
+    return $this->hasMany(Homework::class);
+    }
 }

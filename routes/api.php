@@ -15,6 +15,7 @@ use App\Http\Controllers\WeeklyScheduleController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\MarkController;
+use App\Http\Controllers\HomeworkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -79,3 +80,8 @@ Route::post('deleteWeeklySchedule', [WeeklyScheduleController::class, 'deleteWee
 Route::post('storeMarks', [MarkController::class, 'storeMarks']);
 Route::get('getStudentMarks', [MarkController::class, 'getStudentMarks'])->middleware('auth:sanctum');
 Route::get('showStudentsWithMarks', [MarkController::class, 'showStudentsWithMarks']);
+Route::post('addHomework', [HomeworkController::class, 'addHomework']);
+Route::post('updateHomework/{id}', [HomeworkController::class, 'updateHomework']);
+Route::delete('deleteHomework/{id}', [HomeworkController::class, 'deleteHomework']);
+Route::get('getHomeworksByClassroomAndSubject/{classroom_id}/{subject_id}', [HomeworkController::class, 'getHomeworksByClassroomAndSubject']);
+Route::get('getStudentHomeworks', [HomeworkController::class, 'getStudentHomeworks'])->middleware('auth:sanctum');
