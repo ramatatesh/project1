@@ -42,32 +42,31 @@ class AttendanceController extends Controller
 
 //_________________________________________________________________________________________________
 
-        public function getAbsenceCountBySection($grade_id,$classroom_id)
-    {
+       public function getAbsenceCountBySection($grade_id, $classroom_id)
+{
+    $students = Student::with('user')
+        ->where('grade_id', $grade_id)
+        ->where('classroom_id', $classroom_id)
+        ->get();
 
-        $students = Student::with('user')
-            ->where($grade_id)
-            ->where($classroom_id)
-            ->get();
+    $data = $students->map(function ($student) {
+        $absenceCount = Attendance::where('student_id', $student->id)
+            ->where('status', 'absent')
+            ->count();
 
-        $data = $students->map(function ($student) {
-            $absenceCount = Attendance::where('student_id', $student->id)
-                ->where('status', 'absent')
-                ->count();
+        return [
+            'student_id' => $student->id,
+            'name' => optional($student->user)->first_name . ' ' . optional($student->user)->last_name,
+            'absence_days' => $absenceCount,
+        ];
+    });
 
-            return [
-                'student_id' => $student->id,
-                'name' => optional($student->user)->first_name . ' ' . optional($student->user)->last_name,
-                'absence_days' => $absenceCount,
-            ];
-        });
-
-        return response()->json([
-            'classroom_id' => $classroom_id,
-            'grade_id' => $grade_id,
-            'students' => $data,
-        ]);
-    }
+    return response()->json([
+        'classroom_id' => $classroom_id,
+        'grade_id' => $grade_id,
+        'students' => $data,
+    ]);
+}
 //________________________________________________________________________________________
     // تابع لعرض غيابات طالب معين (للويب)
     public function getStudentAbsences($studentId)
