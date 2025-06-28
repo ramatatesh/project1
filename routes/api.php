@@ -62,6 +62,7 @@ Route::post('takeAbsences', [AttendanceController::class, 'takeAbsences']);
 Route::get('getAbsenceCountBySection/{grade_id}/{classroom_id}', [AttendanceController::class, 'getAbsenceCountBySection']);
 Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getStudentAbsences']);
 Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
+Route::get('getTeacherWeeklySchedule', [WeeklyScheduleController::class, 'getTeacherWeeklySchedule'])->middleware('auth:sanctum');
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);

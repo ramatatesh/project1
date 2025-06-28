@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -187,7 +188,7 @@ public function updateWeeklySchedule(Request $request)
                         ->first();
 
         if (!$lesson) {
-            continue; 
+            continue;
         }
 
         $lesson->subject_id = $lessonData['subject_id'] ?? $lesson->subject_id;
@@ -224,6 +225,46 @@ public function deleteWeeklySchedule(Request $request)
     return response()->json(['message' => 'تم حذف الجدول الأسبوعي بنجاح.'], 200);
 }
 //________________________________________________________________________________________
+
+
+//________________________________________________________________________________________________________
+
+    public function getTeacherWeeklySchedule()
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->teacher) {
+            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+        }
+
+        $teacher = $user->teacher;
+
+        $lessons = Lesson::with([
+            'subject:id,name',
+            'weeklySchedule.classroom:id,name'
+        ])
+            ->where('teacher_id', $teacher->id)
+            ->orderBy('day')
+            ->orderBy('time')
+            ->get()
+            ->groupBy('day')
+            ->map(function ($dayLessons) {
+                return $dayLessons->map(function ($lesson) {
+                    return [
+                        'subject' => $lesson->subject->name ?? null,
+                        'classroom' => $lesson->weeklySchedule->classroom->name ?? null,
+                        'time' => $lesson->time,
+                    ];
+                });
+            });
+
+        return response()->json([
+            'teacher_id' => $teacher->id,
+            'teacher_name' => $user->first_name . ' ' . $user->last_name,
+            'schedule' => $lessons
+        ]);
+    }
+
 
 }
 
