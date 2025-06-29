@@ -11,30 +11,39 @@ use Illuminate\Http\Request;
 class NoteController extends Controller
 {
       // تابع لإنشاء ملاحظة جديدة
-      public function storeNote(Request $request)
-      {
+    public function storeNote(Request $request)
+    {
+        $request->validate([
+            'student_id' => 'required|exists:students,id',
+            'content' => 'required|string|max:1000',
+        ]);
 
-    $request->validate([
-        'student_id' => 'required|exists:students,id',
-        'content' => 'required|string|max:1000',
-    ]);
+        $student = Student::find($request->student_id);
 
-          $student = Student::find($request->student_id);
+        if (!$student) {
+            return response()->json(['message' => 'الطالب غير موجود.'], 404);
+        }
 
-          if (!$student) {
-              return response()->json(['message' => 'الطالب غير موجود.'], 404);
-          }
+        // هنا التأكد أنك تستخدم فقط content وليس محتوى الطلب كاملاً
+        $note = Note::create([
+            'student_id' => $student->id,
+            'content' => $request->input('content'), // ← هذا هو الأهم
+        ]);
 
-    $note = Note::create([
-        'student_id' => $student->id,
-        'content' => $request->content,
-    ]);
+        return response()->json([
+            'message' => 'تم إنشاء الملاحظة بنجاح',
+            'note' => [
+                'id' => $note->id,
+                'student_id' => $note->student_id,
+                'content' => $note->content,
+                'created_at' => $note->created_at->format('Y-m-d'),
+            ]
+        ], 201);
+    }
 
-    return response()->json(['message' => 'تم إنشاء الملاحظة بنجاح', 'note' => $note], 201);
-}
 
 
- //___________________________________________________________________
+    //___________________________________________________________________
              //تابع لحذف الملاحظة
           public function destroy($id)
           {
@@ -55,28 +64,35 @@ class NoteController extends Controller
           //___________________________________________________________________
 
           //تابع لتعديل الملاحظة
-          public function update(Request $request, $id)
-      {
-          $request->validate([
-              'content' => 'required|string|max:1000',
-          ]);
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
 
+        $note = Note::find($id);
 
-          $note = Note::find($id);
+        if (!$note) {
+            return response()->json(['message' => 'الملاحظة غير موجودة.'], 404);
+        }
 
-          if (!$note) {
-              return response()->json(['message' => 'الملاحظة غير موجودة.'], 404);
-          }
+        // تحديث المحتوى مباشرة من input وليس body كامل
+        $note->update([
+            'content' => $request->input('content'),
+        ]);
 
+        return response()->json([
+            'message' => 'تم تعديل الملاحظة بنجاح',
+            'note' => [
+                'id' => $note->id,
+                'student_id' => $note->student_id,
+                'content' => $note->content,
+                'updated_at' => $note->updated_at->format('Y-m-d'),
+            ],
+        ]);
+    }
 
-          $note->update([
-              'content' => $request->content,
-          ]);
-
-          return response()->json(['message' => 'تم تعديل الملاحظة بنجاح', 'note' => $note]);
-      }
-
-       //___________________________________________________________________
+    //___________________________________________________________________
 
        //تابع لجلب جميع ملاحظات طالب معين
     public function allnoteStudent()
@@ -100,5 +116,32 @@ class NoteController extends Controller
 
         return response()->json(['notes' => $notes]);
     }
+//_____________________________________________________________________________________________________________
+
+    public function getNoteStudent($studentId)
+    {
+        $student = \App\Models\Student::find($studentId);
+
+        if (!$student) {
+            return response()->json(['message' => 'الطالب غير موجود.'], 404);
+        }
+
+        $notes = \App\Models\Note::where('student_id', $student->id)
+            ->latest()
+            ->get()
+            ->map(function ($note) {
+                return [
+                    'id' => $note->id,
+                    'content' => $note->content,
+                    'created_at' => $note->created_at->format('Y-m-d'),
+                ];
+            });
+
+        return response()->json([
+            'student_id' => $studentId,
+            'notes' => $notes,
+        ]);
+    }
+
 
 }

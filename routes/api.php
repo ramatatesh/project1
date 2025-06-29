@@ -4,6 +4,7 @@ use App\Http\Controllers\AdmainController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\TeacherController;
@@ -63,12 +64,14 @@ Route::get('getAbsenceCountBySection/{grade_id}/{classroom_id}', [AttendanceCont
 Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getStudentAbsences']);
 Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
 Route::get('getTeacherWeeklySchedule', [WeeklyScheduleController::class, 'getTeacherWeeklySchedule'])->middleware('auth:sanctum');
+Route::post('uploadFile', [FileController::class, 'uploadFile'])->middleware('auth:sanctum');
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);
 Route::post('updateNote/{id}', [NoteController::class, 'update']);
 Route::delete('deleteNote/{id}', [NoteController::class, 'destroy']);
 Route::get('allnoteStudent', [NoteController::class, 'allnoteStudent'])->middleware('auth:sanctum');
+Route::get('getNoteStudent/{id}', [NoteController::class, 'getNoteStudent']);
 Route::get('getStudentsByGradeAndClassroom/{gradeId}/{sectionId}', [StudentController::class, 'getStudentsByGradeAndClassroom']);
 Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeeklySchedule']);
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
