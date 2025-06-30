@@ -65,6 +65,11 @@ Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getS
 Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
 Route::get('getTeacherWeeklySchedule', [WeeklyScheduleController::class, 'getTeacherWeeklySchedule'])->middleware('auth:sanctum');
 Route::post('uploadFile', [FileController::class, 'uploadFile'])->middleware('auth:sanctum');
+Route::post('updateFile/{id}', [FileController::class, 'updateFile'])->middleware('auth:sanctum');
+Route::delete('deleteFile/{id}', [FileController::class, 'deleteFile'])->middleware('auth:sanctum');
+Route::get('restoreFile/{id}', [FileController::class, 'restoreFile'])->middleware('auth:sanctum');
+Route::delete('forceDeleteFile/{id}', [FileController::class, 'forceDeleteFile'])->middleware('auth:sanctum');
+Route::get('trashedFiles', [FileController::class, 'trashedFiles'])->middleware('auth:sanctum');
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);
