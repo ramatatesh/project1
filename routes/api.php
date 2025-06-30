@@ -70,6 +70,9 @@ Route::delete('deleteFile/{id}', [FileController::class, 'deleteFile'])->middlew
 Route::get('restoreFile/{id}', [FileController::class, 'restoreFile'])->middleware('auth:sanctum');
 Route::delete('forceDeleteFile/{id}', [FileController::class, 'forceDeleteFile'])->middleware('auth:sanctum');
 Route::get('trashedFiles', [FileController::class, 'trashedFiles'])->middleware('auth:sanctum');
+Route::get('listFiles', [FileController::class, 'listFiles'])->middleware('auth:sanctum');
+Route::get('getFilesBySubjectForStudent', [FileController::class, 'getFilesBySubjectForStudent'])->middleware('auth:sanctum');
+Route::get('getFilesByTeacherId/{teacher_id}', [FileController::class, 'getFilesByTeacherId']);
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\File;
+use App\Models\Lesson;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -210,6 +212,134 @@ class FileController extends Controller
             'trashed_files' => $files
         ]);
     }
+//______________________________________________________________________________________________
+
+    public function listFiles()
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->teacher) {
+            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+        }
+
+        $files = \App\Models\File::where('teacher_id', $user->teacher->id)
+            ->with(['classroom.grade']) // نحصل على الشعب فقط للوصول للصفوف
+            ->latest()
+            ->get()
+            ->map(function ($file) {
+                // جلب الصفوف المرتبطة دون تكرار
+                $grades = $file->classroom
+                    ->pluck('grade')
+                    ->filter()
+                    ->unique('id')
+                    ->map(function ($grade) {
+                        return [
+                            'id' => $grade->id,
+                            'name' => $grade->name,
+                        ];
+                    })
+                    ->values();
+
+                return [
+                    'id' => $file->id,
+                    'name' => $file->name,
+                    'uploaded_at' => $file->created_at->format('Y-m-d H:i'),
+                    'file_url' => asset('storage/' . $file->path),
+                    'grades' => $grades, // عرض الصفوف فقط
+                ];
+            });
+
+        return response()->json([
+            'files' => $files
+        ]);
+    }
+//________________________________________________________________________________________
+
+    public function getFilesBySubjectForStudent(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->student) {
+            return response()->json(['message' => 'المستخدم غير طالب'], 403);
+        }
+
+        $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+        ]);
+
+        $student = $user->student;
+        $classroom = $student->classroom;
+
+        if (!$classroom) {
+            return response()->json(['message' => 'الطالب غير منسوب إلى شعبة'], 404);
+        }
+
+        // استخراج معرّفات المعلمين الذين يدرّسون هذا الطالب في هذه المادة
+        $teacherIds = Lesson::whereHas('weeklySchedule', function ($query) use ($classroom) {
+            $query->where('classroom_id', $classroom->id);
+        })
+            ->where('subject_id', $request->subject_id)
+            ->pluck('teacher_id')
+            ->unique();
+
+        // جلب الملفات من هؤلاء المعلمين فقط
+        $files = File::whereIn('teacher_id', $teacherIds)
+            ->whereHas('classroom', function ($query) use ($classroom) {
+                $query->where('classroom_id', $classroom->id);
+            })
+            ->with(['teacher.user', 'classroom', 'classroom.grade'])
+            ->latest()
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'file_id' => $file->id,
+                    'file_name' => $file->name,
+                    'file_url' => asset('storage/' . $file->path),
+                    'teacher' => optional($file->teacher->user)->first_name . ' ' . optional($file->teacher->user)->last_name,
+                    'uploaded_at' => $file->created_at->format('Y-m-d H:i'),
+                    'grades' => $file->classroom->pluck('grade.name')->unique()->values(),
+                ];
+            });
+
+        return response()->json([
+            'files' => $files
+        ]);
+    }
+//_______________________________________________________________________________________________
+
+    public function getFilesByTeacherId($teacher_id)
+    {
+        // التأكد من وجود المعلم
+        $teacher = Teacher::find($teacher_id);
+
+        if (!$teacher) {
+            return response()->json(['message' => 'المعلم غير موجود'], 404);
+        }
+
+        // جلب الملفات المرتبطة بالمعلم
+        $files = File::where('teacher_id', $teacher->id)
+            ->with('classroom.grade') // لجلب الصفوف المرتبطة عبر الشعب
+            ->latest()
+            ->get()
+            ->map(function ($file) {
+                return [
+                    'file_id' => $file->id,
+                    'file_name' => $file->name,
+                    'file_url' => asset('storage/' . $file->path),
+                    'uploaded_at' => $file->created_at->format('Y-m-d H:i'),
+                    'grades' => $file->classroom
+                        ->pluck('grade.name')
+                        ->unique()
+                        ->values(),
+                ];
+            });
+
+        return response()->json([
+            'teacher_id' => $teacher->id,
+            'files' => $files,
+        ]);
+    }
+
 
 
 }
