@@ -88,7 +88,7 @@ Route::get('getSubject', [SubjectController::class, 'getSubject']);
 Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
 Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
 Route::post('updateWeeklySchedule', [WeeklyScheduleController::class, 'updateWeeklySchedule']);
-Route::post('deleteWeeklySchedule', [WeeklyScheduleController::class, 'deleteWeeklySchedule']);
+Route::delete('deleteWeeklySchedule', [WeeklyScheduleController::class, 'deleteWeeklySchedule']);
 Route::post('storeMarks', [MarkController::class, 'storeMarks']);
 Route::get('getStudentMarks', [MarkController::class, 'getStudentMarks'])->middleware('auth:sanctum');
 Route::get('showStudentsWithMarks', [MarkController::class, 'showStudentsWithMarks']);
