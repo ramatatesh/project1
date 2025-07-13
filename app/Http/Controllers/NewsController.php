@@ -18,7 +18,7 @@ class NewsController extends Controller
         $news = News::create([
             'grade_id' => $request->grade_id,
             'title' => $request->title,
-            'content' => $request->content
+            'content' => $request->input('content'),
         ]);
 
         return response()->json(['message' => 'تم إنشاء الخبر بنجاح', 'news' => $news], 200);
@@ -76,6 +76,22 @@ public function updateNews(Request $request, $id){
     });
 
         return response()->json($news);
+    }
+//____________________________________________________________________________________________________
+
+    public function getAllNews()
+    {
+        $news = News::latest()->get()->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'grade_id' =>$item->grade_id,
+                'title' => $item->title,
+                'content' => $item->content,
+                'created_at' => $item->created_at->format('Y-m-d'),
+            ];
+        });
+
+        return response()->json(['news' => $news]);
     }
 
 }

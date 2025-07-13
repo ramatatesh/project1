@@ -52,6 +52,7 @@ Route::get('getInfo', [InformationController::class, 'getInfo']);
 Route::post('updateInfo', [InformationController::class, 'updateInfo']);
 Route::post('addNews', [NewsController::class, 'storeNews']);
 Route::post('updateNews/{id}', [NewsController::class, 'updateNews']);
+Route::get('getAllNews', [NewsController::class, 'getAllNews']);
 Route::get('getNews', [NewsController::class, 'getNews'])->middleware('auth:sanctum');
 Route::delete('deleteNews/{id}', [NewsController::class, 'deleteNews']);
 Route::post('addComplaint', [ComplaintController::class, 'addComplaint'])->middleware('auth:sanctum');
