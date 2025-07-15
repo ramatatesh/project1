@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
@@ -187,7 +188,7 @@ public function updateWeeklySchedule(Request $request)
                         ->first();
 
         if (!$lesson) {
-            continue; 
+            continue;
         }
 
         $lesson->subject_id = $lessonData['subject_id'] ?? $lesson->subject_id;
@@ -224,6 +225,73 @@ public function deleteWeeklySchedule(Request $request)
     return response()->json(['message' => 'تم حذف الجدول الأسبوعي بنجاح.'], 200);
 }
 //________________________________________________________________________________________
+
+
+//________________________________________________________________________________________________________
+
+    public function getTeacherWeeklySchedule(Request $request)
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->teacher) {
+            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+        }
+
+        $teacher = $user->teacher;
+
+        // جلب قيمة الفصل الدراسي من request
+        $semester = $request->query('semester');
+
+        // التحقق من صحة الفصل الدراسي
+        if (!in_array($semester, ['first', 'second'])) {
+            return response()->json(['message' => 'يجب تحديد الفصل الدراسي بشكل صحيح: first أو second'], 400);
+        }
+
+        // جلب الدروس بناءً على الفصل الدراسي
+        $lessons = Lesson::with([
+            'subject:id,name',
+            'weeklySchedule.classroom.grade:id,name',
+        ])
+            ->where('teacher_id', $teacher->id)
+            ->whereHas('weeklySchedule', function($query) use ($semester) {
+                $query->where('semester', $semester);
+            })
+            ->orderBy('day')
+            ->orderBy('time')
+            ->get();
+
+        if ($lessons->isEmpty()) {
+            return response()->json([
+                'teacher_id' => $teacher->id,
+                'teacher_name' => $user->first_name . ' ' . $user->last_name,
+                'semester' => $semester,
+                'schedule' => [],
+                'message' => 'لا يوجد جدول لهذا المعلم في هذا الفصل الدراسي.'
+            ]);
+        }
+
+        // تجميع الدروس حسب اليوم
+        $groupedLessons = $lessons->groupBy('day')->map(function ($dayLessons) {
+            return $dayLessons->map(function ($lesson) {
+                return [
+                    'subject' => $lesson->subject->name ?? null,
+                    'classroom' => $lesson->weeklySchedule->classroom->name ?? null,
+                    'grade' => $lesson->weeklySchedule->classroom->grade->name ?? null,
+                    'time' => $lesson->time,
+                ];
+            });
+        });
+
+        return response()->json([
+            'teacher_id' => $teacher->id,
+            'teacher_name' => $user->first_name . ' ' . $user->last_name,
+            'semester' => $semester,
+            'schedule' => $groupedLessons,
+        ]);
+    }
+
+
+
 
 }
 

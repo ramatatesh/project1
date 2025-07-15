@@ -4,15 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class File extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['teacher_id','name'];
+    protected $fillable = ['teacher_id','name', 'path'];
 
     public function classroom()
     {
         return $this->belongsToMany(Classroom::class);
     }
+
+
+    public function teacher()
+    {
+        return $this->belongsTo(Teacher::class);
+    }
+
+
 }

@@ -39,7 +39,7 @@ class TeacherController extends Controller
             'user_id' => $user->id,
             'specialization' => $validatedData['specialization'],
             'start_date' => $validatedData['start_date'],
-            'subject_id'=>$validatedData['subject_id'],
+            'subject_name'=>$validatedData['subject_name'],
         ]);
         return response()->json([
             'message'=>'User Registered Successfully',
@@ -81,7 +81,7 @@ class TeacherController extends Controller
         $teacherData = [
             'specialization' => $validatedData['specialization'] ?? $user->teacher->specialization,
             'start_date' => $validatedData['start_date'] ?? $user->teacher->start_date,
-            'subject_id' => $validatedData['subject_id'] ?? $user->teacher->subject_id,
+            'subject_name' => $validatedData['subject_name'] ?? $user->teacher->subject_id,
         ];
 
         $user->update(array_filter($userData, fn($val) => !is_null($val)));
