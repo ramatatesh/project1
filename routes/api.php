@@ -32,7 +32,7 @@ Route::post('addStudent',[StudentController::class,'addStudent']);
 Route::get('getGrades', [GradeController::class, 'getGrades']);
 Route::post('updateStudent/{userId}',[StudentController::class,'updateStudent']);
 Route::delete('destroyStudent/{userId}',[StudentController::class,'destroyStudent']);
-Route::post('showStudent',[StudentController::class,'showStudent'])->middleware('auth:sanctum');;
+Route::get('showStudent',[StudentController::class,'showStudent'])->middleware('auth:sanctum');;
 Route::put('updateAccount',[UserController::class,'updateAccount']);
 Route::post('deleteUser',[UserController::class,'deleteUser']);
 Route::post('addTeacher',[TeacherController::class,'addTeacher']);
@@ -85,3 +85,4 @@ Route::post('updateHomework/{id}', [HomeworkController::class, 'updateHomework']
 Route::delete('deleteHomework/{id}', [HomeworkController::class, 'deleteHomework']);
 Route::get('getHomeworksByClassroomAndSubject/{classroom_id}/{subject_id}', [HomeworkController::class, 'getHomeworksByClassroomAndSubject']);
 Route::get('getStudentHomeworks', [HomeworkController::class, 'getStudentHomeworks'])->middleware('auth:sanctum');
+Route::get('showTeacher',[TeacherController::class,'showTeacher'])->middleware('auth:sanctum');

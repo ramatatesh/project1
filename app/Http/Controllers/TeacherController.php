@@ -9,6 +9,7 @@ use App\Models\Teacher;
 use App\Models\User;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class TeacherController extends Controller
@@ -155,5 +156,26 @@ class TeacherController extends Controller
 
         return response()->json($formatted);
     }
+
+
+    public function showTeacher(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(["message" => "User not authenticated"], 401);
+        }
+
+        $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
+        if (!$teacher) {
+            return response()->json(["message" => "المعلم غير موجود"], 404);
+        }
+
+        return response()->json([
+            'message' => 'تم جلب بيانات المعلم بنجاح',
+            'teacher' => $teacher
+        ], 200);
+    }
+
 
 }
