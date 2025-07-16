@@ -32,4 +32,5 @@ class Subject extends Model
     }
 
 
+
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('subject_id')->constrained('subjects')->cascadeOnDelete();
             $table->foreignId('exam_schedule_id')->constrained('exam_schedules')->cascadeOnDelete();
-            $table->string('day');
+            $table->enum('day', ['Sunday', 'Monday', 'Tuesday','Wednesday','Thursday']);
             $table->string('time');
             $table->timestamps();
         });
