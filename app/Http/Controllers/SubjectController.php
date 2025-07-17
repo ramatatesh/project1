@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
 use App\Models\Subject;
 
@@ -15,4 +16,30 @@ class SubjectController extends Controller
 }
 
 //_____________________________________________________________________________
+    public function getStudentSubjects()
+    {
+        $user = auth()->user();
+
+        // التأكد أن المستخدم طالب
+        if (!$user || !$user->student) {
+            return response()->json(['message' => 'المستخدم ليس طالباً.'], 403);
+        }
+
+        $student = $user->student;
+        $excludedSubjects = ['Sport', 'Arts', 'Music'];
+
+        // جلب المواد المرتبطة بصف الطالب مع استثناء المواد
+        $subjects = Subject::whereHas('grades', function ($query) use ($student) {
+            $query->where('grades.id', $student->grade_id);
+        })->whereNotIn('name', $excludedSubjects)
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'student_name' => $user->first_name . ' ' . $user->last_name,
+            'grade_id' => $student->grade_id,
+            'subjects' => $subjects,
+        ]);
+    }
+
+
 }
