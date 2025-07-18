@@ -82,13 +82,18 @@ public function getWeeklySchedule(Request $request)
         return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
     }
 
+    $semester = $request->input('semester');
+    if (!in_array($semester, ['first', 'seconde'])) {
+        return response()->json(['message' => 'يرجى تحديد الفصل.'], 422);
+    }
+
     $schedules = WeeklySchedule::where('classroom_id', $classroom->id)
+        ->where('semester', $semester)
         ->with(['lessons.subject:id,name', 'lessons.teacher.user:id,username'])
-        ->orderBy('semester')
         ->get();
 
     if ($schedules->isEmpty()) {
-        return response()->json(['message' => 'لا يوجد جداول أسبوعية لهذه الشعبة.'], 404);
+        return response()->json(['message' => 'لا يوجد جدول أسبوعي لهذه الشعبة في هذا الفصل.'], 404);
     }
 
     $result = $schedules->map(function ($schedule) {
@@ -120,6 +125,7 @@ public function getWeeklySchedule(Request $request)
         'schedules' => $result,
     ]);
 }
+
 
 
 //________________________________________________________________________________________
