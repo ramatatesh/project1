@@ -4,6 +4,7 @@ use App\Http\Controllers\AdmainController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\ComplaintController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\ExamScheduleController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\InformationController;
 use App\Http\Controllers\NewsController;
@@ -74,6 +75,11 @@ Route::get('trashedFiles', [FileController::class, 'trashedFiles'])->middleware(
 Route::get('listFiles', [FileController::class, 'listFiles'])->middleware('auth:sanctum');
 Route::get('getFilesBySubjectForStudent', [FileController::class, 'getFilesBySubjectForStudent'])->middleware('auth:sanctum');
 Route::get('getFilesByTeacherId/{teacher_id}', [FileController::class, 'getFilesByTeacherId']);
+Route::get('getStudentExamSchedule', [ExamScheduleController::class, 'getStudentExamSchedule'])->middleware('auth:sanctum');
+Route::post('storeExamSchedule', [ExamScheduleController::class, 'storeExamSchedule']);
+Route::get('getExamScheduleByGrade', [ExamScheduleController::class, 'getExamScheduleByGrade']);
+Route::post('updateExamSchedule', [ExamScheduleController::class, 'updateExamSchedule']);
+Route::delete('deleteExamSchedule', [ExamScheduleController::class, 'deleteExamSchedule']);
 
 
 Route::post('addNote', [NoteController::class, 'storeNote']);
@@ -86,6 +92,8 @@ Route::post('storeWeeklySchedule', [WeeklyScheduleController::class, 'storeWeekl
 Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySchedule'])->middleware('auth:sanctum');
 Route::get('getClassroomsByGrade/{gradeId}', [ClassroomController::class, 'getClassroomsByGrade']);
 Route::get('getSubject', [SubjectController::class, 'getSubject']);
+Route::get('getStudentSubjects', [SubjectController::class, 'getStudentSubjects'])->middleware('auth:sanctum');
+Route::get('getMySubjects', [SubjectController::class, 'getMySubjects'])->middleware('auth:sanctum');
 Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
 Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
 Route::post('updateWeeklySchedule', [WeeklyScheduleController::class, 'updateWeeklySchedule']);

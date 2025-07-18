@@ -40,7 +40,9 @@ class UpdateTeacherRequest extends FormRequest
             'nationality' => 'nullable|string',
             'first_name' => 'nullable|string|max:255',
             'last_name' => 'nullable|string|max:255',
-            'subject_name' => 'nullable|string|exists:subjects,name',
+            'subject_ids' => 'sometimes|array',
+            'subject_ids.*' => 'exists:subjects,id',
+
         ];
     }
 }

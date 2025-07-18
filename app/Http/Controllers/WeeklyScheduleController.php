@@ -233,8 +233,6 @@ public function deleteWeeklySchedule(Request $request)
 //________________________________________________________________________________________
 
 
-//________________________________________________________________________________________________________
-
     public function getTeacherWeeklySchedule(Request $request)
     {
         $user = auth()->user();
@@ -295,7 +293,6 @@ public function deleteWeeklySchedule(Request $request)
             'schedule' => $groupedLessons,
         ]);
     }
-
 
 
 
