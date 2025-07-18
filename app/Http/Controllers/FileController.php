@@ -20,25 +20,38 @@ class FileController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'file' => 'required|file|mimes:pdf,doc,docx,xlsx,pptx,jpeg,png|max:10240', // 10MB max
-            'grade_id' => 'required|exists:grades,id', // الصف إلزامي هنا
+            'file' => 'required|file|mimes:pdf,doc,docx,xlsx,pptx,jpeg,png|max:10240',
+            'grade_id' => 'required|exists:grades,id',
+            'subject_id' => 'required|exists:subjects,id',
         ]);
+
+        // تأكد أن المعلم يدرّس هذه المادة في هذا الصف
+        $isTeachingSubject = Lesson::whereHas('weeklySchedule.classroom', function ($query) use ($request) {
+            $query->where('grade_id', $request->grade_id);
+        })
+            ->where('teacher_id', $user->teacher->id)
+            ->where('subject_id', $request->subject_id)
+            ->exists();
+
+        if (!$isTeachingSubject) {
+            return response()->json(['message' => 'المعلم لا يدرس هذه المادة في الصف المحدد.'], 403);
+        }
 
         $fileUploaded = $request->file('file');
         $path = $fileUploaded->store('files', 'public');
 
-        // حفظ الملف
         $file = File::create([
             'teacher_id' => $user->teacher->id,
             'name' => $request->name,
             'path' => $path,
+            'subject_id' => $request->subject_id,
         ]);
 
-        // جلب كل الشعب داخل الصف المحدد والتي يُدرّسها هذا المعلم
         $classroomIds = \App\Models\Lesson::whereHas('weeklySchedule.classroom', function ($query) use ($request) {
             $query->where('grade_id', $request->grade_id);
         })
             ->where('teacher_id', $user->teacher->id)
+            ->where('subject_id', $request->subject_id)
             ->with('weeklySchedule.classroom')
             ->get()
             ->pluck('weeklySchedule.classroom.id')
@@ -47,14 +60,13 @@ class FileController extends Controller
             ->toArray();
 
         if (empty($classroomIds)) {
-            return response()->json(['message' => 'لا توجد شعب في هذا الصف يُدرّسها المعلم.'], 404);
+            return response()->json(['message' => 'لا توجد شعب في هذا الصف يُدرّسها المعلم لهذه المادة.'], 404);
         }
 
-        // ربط الملف مع هذه الشعب فقط
         $file->classroom()->sync($classroomIds);
 
         return response()->json([
-            'message' => 'تم رفع الملف وربطه تلقائيًا بالشعب التي يدرسها المعلم في هذا الصف.',
+            'message' => 'تم رفع الملف وربطه بالمادة والشعب بنجاح.',
             'file' => $file,
             'classroom_ids' => $classroomIds,
             'file_url' => asset('storage/' . $path),

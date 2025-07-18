@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('files', function (Blueprint $table) {
             $table->id();
             $table->foreignId('teacher_id')->constrained('teachers')->cascadeOnDelete();
+            $table->foreignId('subject_id')->nullable()->constrained('subjects')->cascadeOnDelete();
             $table->string('name');
             $table->string('path');
             $table->timestamps();
@@ -23,10 +24,12 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('files');
+        Schema::table('files', function (Blueprint $table) {
+            $table->dropForeign(['subject_id']);
+            $table->dropColumn('subject_id');
+        });
     }
-
 
 };

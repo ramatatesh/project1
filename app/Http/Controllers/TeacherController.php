@@ -39,14 +39,18 @@ class TeacherController extends Controller
             'user_id' => $user->id,
             'specialization' => $validatedData['specialization'],
             'start_date' => $validatedData['start_date'],
-            'subject_name'=>$validatedData['subject_name'],
         ]);
+
+        // ربط المواد
+        $teacher->subjects()->attach($validatedData['subject_ids']);
+
         return response()->json([
-            'message'=>'User Registered Successfully',
-            'User'=>$user,
+            'message' => 'تم إنشاء المعلم بنجاح',
+            'user' => $user,
             'teacher' => $teacher,
-            201]);
+        ], 201);
     }
+
     //________________________________________________________________________________________
     // تابع لتعديل بيانات معلم
     public function updateTeacher(UpdateTeacherRequest $request, $userId)
@@ -81,7 +85,6 @@ class TeacherController extends Controller
         $teacherData = [
             'specialization' => $validatedData['specialization'] ?? $user->teacher->specialization,
             'start_date' => $validatedData['start_date'] ?? $user->teacher->start_date,
-            'subject_name' => $validatedData['subject_name'] ?? $user->teacher->subject_id,
         ];
 
         $user->update(array_filter($userData, fn($val) => !is_null($val)));
@@ -92,9 +95,14 @@ class TeacherController extends Controller
 
         $user->teacher->update(array_filter($teacherData, fn($val) => !is_null($val)));
 
+        // تحديث المواد التي يدرسها المعلم إن وُجدت
+        if (isset($validatedData['subject_ids']) && is_array($validatedData['subject_ids'])) {
+            $user->teacher->subjects()->sync($validatedData['subject_ids']);
+        }
+
         return response()->json([
             'message' => 'تم التحديث بنجاح',
-            'User' => $user
+            'User' => $user->load('teacher.subjects')
         ], 200);
     }
 
@@ -132,7 +140,7 @@ class TeacherController extends Controller
 
     public function getTeacher()
     {
-        $teachers = Teacher::with(['user', 'subject:id,name'])->get();
+        $teachers = Teacher::with(['user', 'subjects:id,name'])->get();
 
         $formatted = $teachers->map(function ($teacher) {
             return [
@@ -150,33 +158,13 @@ class TeacherController extends Controller
                 'nationality' => $teacher->user->nationality,
                 'specialization' => $teacher->specialization,
                 'start_date' => $teacher->start_date,
-                'subject' => $teacher->subject ? $teacher->subject->name : null, // اسم المادة بدلًا من subject_id
+                'subjects' => $teacher->subjects->pluck('name'), // إرجاع أسماء المواد كمصفوفة
             ];
         });
 
         return response()->json($formatted);
     }
 //___________________________________________________________________________________________
-
-    public function showTeacher(Request $request)
-    {
-        $user = Auth::user();
-
-        if (!$user) {
-            return response()->json(["message" => "User not authenticated"], 401);
-        }
-
-        $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
-        if (!$teacher) {
-            return response()->json(["message" => "المعلم غير موجود"], 404);
-        }
-
-        return response()->json([
-            'message' => 'تم جلب بيانات المعلم بنجاح',
-            'teacher' => $teacher
-        ], 200);
-    }
-
 
     public function showTeacher(Request $request)
     {

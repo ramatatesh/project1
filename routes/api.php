@@ -93,6 +93,7 @@ Route::get('getWeeklySchedule', [WeeklyScheduleController::class, 'getWeeklySche
 Route::get('getClassroomsByGrade/{gradeId}', [ClassroomController::class, 'getClassroomsByGrade']);
 Route::get('getSubject', [SubjectController::class, 'getSubject']);
 Route::get('getStudentSubjects', [SubjectController::class, 'getStudentSubjects'])->middleware('auth:sanctum');
+Route::get('getMySubjects', [SubjectController::class, 'getMySubjects'])->middleware('auth:sanctum');
 Route::get('getTeachersBySubject/{subject_id}', [TeacherController::class, 'getTeachersBySubject']);
 Route::get('showWeeklySchedule', [WeeklyScheduleController::class, 'showWeeklySchedule']);
 Route::post('updateWeeklySchedule', [WeeklyScheduleController::class, 'updateWeeklySchedule']);

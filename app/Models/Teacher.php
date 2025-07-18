@@ -15,10 +15,11 @@ class Teacher extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function subject()
+    public function subjects()
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsToMany(Subject::class);
     }
+
     public function classrooms()
     {
         return $this->belongsToMany(Classroom::class);
