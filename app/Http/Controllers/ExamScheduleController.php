@@ -60,16 +60,13 @@ class ExamScheduleController extends Controller
 
         $student = $user->student;
 
-        // بإمكانك جعل الفصل يأتي من الطلب أو تعيينه افتراضيًا
-        $semester = $request->query('semester', 'first'); // or 'second'
 
-        // جلب جدول الامتحانات المرتبط بصف الطالب
         $schedule = ExamSchedule::where('grade_id', $student->grade_id)
-            ->where('semester', $semester)
+            ->orderBy('semester') // مثلا نرتب حسب الفصل (أو حسب حاجة المنطق)
             ->first();
 
         if (!$schedule) {
-            return response()->json(['message' => 'لا يوجد جدول امتحانات لهذا الصف في هذا الفصل.'], 404);
+            return response()->json(['message' => 'لا يوجد جدول امتحانات لهذا الصف.'], 404);
         }
 
         // جلب الامتحانات المرتبطة بالجدول
@@ -87,7 +84,7 @@ class ExamScheduleController extends Controller
         return response()->json([
             'student_name' => $user->first_name . ' ' . $user->last_name,
             'grade_id' => $student->grade_id,
-            'semester' => $semester,
+            'semester' => $schedule->semester, // عرض الفصل المرتبط بالجدول مباشرة
             'exams' => $formattedExams,
         ]);
     }
