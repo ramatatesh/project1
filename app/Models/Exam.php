@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Exam extends Model
 {
 
-    protected $fillable = ['subject_id','exam_schedule_id','day','time'];
+    protected $fillable = ['subject_id','exam_schedule_id','day','time','date'];
 
    public function examSchedule()
     {

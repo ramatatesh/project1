@@ -17,6 +17,7 @@ class ExamScheduleController extends Controller
             'exams.*.day' => 'required|in:Sunday,Monday,Tuesday,Wednesday,Thursday',
             'exams.*.subject_id' => 'required|exists:subjects,id',
             'exams.*.time' => 'required|date_format:H:i',
+            'exams.*.date' => 'required|date|after_or_equal:today', // ✅ تحقق من وجود التاريخ وصحته
         ]);
 
         // التحقق من وجود جدول مسبقًا
@@ -43,6 +44,7 @@ class ExamScheduleController extends Controller
                 'subject_id' => $exam['subject_id'],
                 'day' => $exam['day'],
                 'time' => $exam['time'],
+                'date' => $exam['date'],
             ]);
         }
 
@@ -60,9 +62,9 @@ class ExamScheduleController extends Controller
 
         $student = $user->student;
 
-
+        // جلب أحدث جدول امتحاني لهذا الصف
         $schedule = ExamSchedule::where('grade_id', $student->grade_id)
-            ->orderBy('semester') // مثلا نرتب حسب الفصل (أو حسب حاجة المنطق)
+            ->orderByDesc('created_at')
             ->first();
 
         if (!$schedule) {
@@ -70,13 +72,18 @@ class ExamScheduleController extends Controller
         }
 
         // جلب الامتحانات المرتبطة بالجدول
-        $exams = $schedule->exams()->with('subject:id,name')->orderBy('day')->orderBy('time')->get();
+        $exams = $schedule->exams()
+            ->with('subject:id,name')
+            ->orderBy('day')
+            ->orderBy('time')
+            ->get();
 
         // تحويل البيانات لتنسيق واضح
         $formattedExams = $exams->map(function ($exam) {
             return [
                 'subject' => $exam->subject->name ?? null,
                 'day' => $exam->day,
+                'date' => $exam->date, // ✅ عرض التاريخ
                 'time' => $exam->time,
             ];
         });
@@ -84,10 +91,11 @@ class ExamScheduleController extends Controller
         return response()->json([
             'student_name' => $user->first_name . ' ' . $user->last_name,
             'grade_id' => $student->grade_id,
-            'semester' => $schedule->semester, // عرض الفصل المرتبط بالجدول مباشرة
+            'semester' => $schedule->semester,
             'exams' => $formattedExams,
         ]);
     }
+
 //________________________________________________________________________________________________
 
     public function getExamScheduleByGrade(Request $request)

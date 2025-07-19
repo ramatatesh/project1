@@ -68,64 +68,61 @@ public function storeWeeklySchedule(Request $request)
 //________________________________________________________________________________________
 
  // تابع يعرض الجدول الأسبوعي بناءً على توكن الطالب (للطالب)
-public function getWeeklySchedule(Request $request)
-{
-    $student = auth()->user()->student;
+//________________________________________________________________________________________
 
-    if (!$student) {
-        return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
-    }
+    // تابع يعرض الجدول الأسبوعي بناءً على توكن الطالب (للطالب)
+    public function getWeeklySchedule(Request $request)
+    {
+        $student = auth()->user()->student;
 
-    $classroom = $student->classroom;
+        if (!$student) {
+            return response()->json(['message' => 'المستخدم ليس طالبًا.'], 403);
+        }
 
-    if (!$classroom) {
-        return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
-    }
+        $classroom = $student->classroom;
 
-    $semester = $request->input('semester');
-    if (!in_array($semester, ['first', 'seconde'])) {
-        return response()->json(['message' => 'يرجى تحديد الفصل.'], 422);
-    }
+        if (!$classroom) {
+            return response()->json(['message' => 'الطالب غير مرتبط بأي شعبة.'], 404);
+        }
 
-    $schedules = WeeklySchedule::where('classroom_id', $classroom->id)
-        ->where('semester', $semester)
-        ->with(['lessons.subject:id,name', 'lessons.teacher.user:id,username'])
-        ->get();
+        $schedules = WeeklySchedule::where('classroom_id', $classroom->id)
+            ->with(['lessons.subject:id,name', 'lessons.teacher.user:id,username'])
+            ->orderBy('semester')
+            ->get();
 
-    if ($schedules->isEmpty()) {
-        return response()->json(['message' => 'لا يوجد جدول أسبوعي لهذه الشعبة في هذا الفصل.'], 404);
-    }
+        if ($schedules->isEmpty()) {
+            return response()->json(['message' => 'لا يوجد جداول أسبوعية لهذه الشعبة.'], 404);
+        }
 
-    $result = $schedules->map(function ($schedule) {
-        $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
-            return $lessons->map(function ($lesson) {
-                $subjectName = $lesson->subject->name ?? 'غير معروف';
-                $slug = Str::slug($subjectName, '_');
-                $imageUrl = asset("images/subjects/{$slug}.png");
+        $result = $schedules->map(function ($schedule) {
+            $grouped = $schedule->lessons->groupBy('day')->map(function ($lessons) {
+                return $lessons->map(function ($lesson) {
+                    $subjectName = $lesson->subject->name ?? 'غير معروف';
+                    $slug = Str::slug($subjectName, '_');
+                    $imageUrl = asset("images/subjects/{$slug}.png");
 
-                return [
-                    'time' => $lesson->time,
-                    'subject' => $subjectName,
-                    'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
-                    'image' => $imageUrl,
-                ];
-            })->sortBy('time')->values();
+                    return [
+                        'time' => $lesson->time,
+                        'subject' => $subjectName,
+                        'teacher' => $lesson->teacher->user->username ?? 'غير معروف',
+                        'image' => $imageUrl,
+                    ];
+                })->sortBy('time')->values();
+            });
+
+            return [
+                'semester' => $schedule->semester,
+                'weekly_schedule' => $grouped,
+            ];
         });
 
-        return [
-            'semester' => $schedule->semester,
-            'weekly_schedule' => $grouped,
-        ];
-    });
-
-    return response()->json([
-        'student' => $student->user->username,
-        'classroom' => $classroom->name,
-        'grade' => $classroom->grade->name,
-        'schedules' => $result,
-    ]);
-}
-
+        return response()->json([
+            'student' => $student->user->username,
+            'classroom' => $classroom->name,
+            'grade' => $classroom->grade->name,
+            'schedules' => $result,
+        ]);
+    }
 
 
 //________________________________________________________________________________________
