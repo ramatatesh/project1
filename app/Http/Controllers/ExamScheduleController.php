@@ -62,37 +62,37 @@ class ExamScheduleController extends Controller
 
         $student = $user->student;
 
-        // جلب أحدث جدول امتحاني لهذا الصف
-        $schedule = ExamSchedule::where('grade_id', $student->grade_id)
-            ->orderByDesc('created_at')
-            ->first();
-
-        if (!$schedule) {
-            return response()->json(['message' => 'لا يوجد جدول امتحانات لهذا الصف.'], 404);
-        }
-
-        // جلب الامتحانات المرتبطة بالجدول
-        $exams = $schedule->exams()
-            ->with('subject:id,name')
-            ->orderBy('day')
-            ->orderBy('time')
+        // جلب جميع جداول الامتحانات المرتبطة بالصف
+        $schedules = ExamSchedule::where('grade_id', $student->grade_id)
+            ->with(['exams' => function ($query) {
+                $query->with('subject:id,name')->orderBy('day')->orderBy('time');
+            }])
+            ->orderBy('semester')
             ->get();
 
-        // تحويل البيانات لتنسيق واضح
-        $formattedExams = $exams->map(function ($exam) {
+        if ($schedules->isEmpty()) {
+            return response()->json(['message' => 'لا يوجد جداول امتحانات لهذا الصف.'], 404);
+        }
+
+        // تنسيق كل جدول
+        $formattedSchedules = $schedules->map(function ($schedule) {
             return [
-                'subject' => $exam->subject->name ?? null,
-                'day' => $exam->day,
-                'date' => $exam->date, // ✅ عرض التاريخ
-                'time' => $exam->time,
+                'semester' => $schedule->semester,
+                'exams' => $schedule->exams->map(function ($exam) {
+                    return [
+                        'subject' => $exam->subject->name ?? null,
+                        'day' => $exam->day,
+                        'date' => $exam->date,
+                        'time' => $exam->time,
+                    ];
+                }),
             ];
         });
 
         return response()->json([
             'student_name' => $user->first_name . ' ' . $user->last_name,
             'grade_id' => $student->grade_id,
-            'semester' => $schedule->semester,
-            'exams' => $formattedExams,
+            'schedules' => $formattedSchedules,
         ]);
     }
 
