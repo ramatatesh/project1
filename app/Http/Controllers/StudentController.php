@@ -12,6 +12,8 @@ use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use App\Services\FirebaseService;
 
 class StudentController extends Controller
 {
@@ -227,6 +229,47 @@ public function addStudent(StoreStudentRequest $request)
             'student' => $student
         ], 200);
     }
+//_____________________________________________________________________________________________________
+// توابع الاشعارات
+    // تابع لحفظ توكن الطالب بالداتا بيز
+    public function updateFcmToken(Request $request)
+{
+    $request->validate([
+        'fcm_token' => 'required|string',
+    ]);
+
+
+    $student = auth()->user();
+
+    $student->fcm_token = $request->fcm_token;
+    $student->save();
+
+    return response()->json(['message' => 'تم تحديث التوكن بنجاح']);
+}
+
+
+public function sendNotificationToSelf()
+{
+    $student = auth()->user();
+
+    if (!$student->fcm_token) {
+        return response()->json(['error' => 'لا يوجد FCM Token لهذا الطالب'], 400);
+    }
+
+    $firebase = new FirebaseService();
+
+    try {
+        $firebase->sendNotificationToDevice(
+            $student->fcm_token,
+            'تنبيه',
+            'هذا إشعار موجه لك شخصيًا 🤓'
+        );
+
+        return response()->json(['message' => 'تم إرسال الإشعار']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'فشل الإرسال: ' . $e->getMessage()], 500);
+    }
+}
 
 }
 

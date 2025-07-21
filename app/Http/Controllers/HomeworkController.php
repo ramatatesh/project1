@@ -6,28 +6,45 @@ use Illuminate\Http\Request;
 use App\Models\Homework;
 use App\Models\User;
 use App\Models\Student;
+use App\Services\FirebaseService;
 
 class HomeworkController extends Controller
 {
     //تابع انشاء واجب لشعبة معينة
-    public function addHomework(Request $request)
+  public function addHomework(Request $request)
 {
     $request->validate([
         'classroom_id' => 'required|exists:classrooms,id',
         'subject_id' => 'required|exists:subjects,id',
         'content' => 'required|string',
-
     ]);
 
     $homework = Homework::create([
         'classroom_id' => $request->classroom_id,
         'subject_id' => $request->subject_id,
         'content' => $request->content,
-
     ]);
 
+    // جلب الطلاب المرتبطين بالشعبة ويملكون fcm_token ضمن جدول users
+    $students = Student::where('classroom_id', $request->classroom_id)
+        ->whereHas('user', function ($query) {
+            $query->whereNotNull('fcm_token');
+        })
+        ->with('user')
+        ->get();
+
+    $firebase = new FirebaseService();
+
+    foreach ($students as $student) {
+        $firebase->sendNotification(
+            $student->user->fcm_token,  // ✅ التوكن من جدول users
+            '📚 واجب جديد',
+            'تم إضافة واجب جديد في إحدى موادك'
+        );
+    }
+
     return response()->json([
-        'message' => 'تمت إضافة الواجب بنجاح.',
+        'message' => 'تمت إضافة الواجب بنجاح وتم إرسال الإشعار.',
         'homework' => $homework,
     ], 201);
 }
@@ -101,3 +118,4 @@ public function getStudentHomeworks()
 }
 //________________________________________________________________________________
 }
+
