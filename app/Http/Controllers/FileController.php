@@ -267,56 +267,57 @@ class FileController extends Controller
     }
 //________________________________________________________________________________________
 
-    public function getFilesBySubjectForStudent(Request $request)
-    {
-        $user = auth()->user();
+   public function getFilesBySubjectForStudent(Request $request)
+{
+    $user = auth()->user();
 
-        if (!$user || !$user->student) {
-            return response()->json(['message' => 'المستخدم غير طالب'], 403);
-        }
+    if (!$user || !$user->student) {
+        return response()->json(['message' => 'المستخدم غير طالب'], 403);
+    }
 
-        $request->validate([
-            'subject_id' => 'required|exists:subjects,id',
-        ]);
+    $request->validate([
+        'subject_id' => 'required|exists:subjects,id',
+    ]);
 
-        $student = $user->student;
-        $classroom = $student->classroom;
+    $student = $user->student;
+    $classroom = $student->classroom;
 
-        if (!$classroom) {
-            return response()->json(['message' => 'الطالب غير منسوب إلى شعبة'], 404);
-        }
+    if (!$classroom) {
+        return response()->json(['message' => 'الطالب غير منسوب إلى شعبة'], 404);
+    }
 
-        // استخراج معرّفات المعلمين الذين يدرّسون هذا الطالب في هذه المادة
-        $teacherIds = Lesson::whereHas('weeklySchedule', function ($query) use ($classroom) {
+    // استخراج معرّفات المعلمين الذين يدرّسون هذا الطالب في هذه المادة
+    $teacherIds = Lesson::whereHas('weeklySchedule', function ($query) use ($classroom) {
+        $query->where('classroom_id', $classroom->id);
+    })
+        ->where('subject_id', $request->subject_id)
+        ->pluck('teacher_id')
+        ->unique();
+
+    // جلب الملفات من هؤلاء المعلمين فقط، وللمادة المحددة فقط
+    $files = File::whereIn('teacher_id', $teacherIds)
+        ->where('subject_id', $request->subject_id) // ✅ الشرط المضاف
+        ->whereHas('classroom', function ($query) use ($classroom) {
             $query->where('classroom_id', $classroom->id);
         })
-            ->where('subject_id', $request->subject_id)
-            ->pluck('teacher_id')
-            ->unique();
+        ->with(['teacher.user', 'classroom', 'classroom.grade'])
+        ->latest()
+        ->get()
+        ->map(function ($file) {
+            return [
+                'file_id' => $file->id,
+                'file_name' => $file->name,
+                'file_url' => asset('storage/' . $file->path),
+                'teacher' => optional($file->teacher->user)->first_name . ' ' . optional($file->teacher->user)->last_name,
+                'uploaded_at' => $file->created_at->format('Y-m-d H:i'),
+                'grades' => $file->classroom->pluck('grade.name')->unique()->values(),
+            ];
+        });
 
-        // جلب الملفات من هؤلاء المعلمين فقط
-        $files = File::whereIn('teacher_id', $teacherIds)
-            ->whereHas('classroom', function ($query) use ($classroom) {
-                $query->where('classroom_id', $classroom->id);
-            })
-            ->with(['teacher.user', 'classroom', 'classroom.grade'])
-            ->latest()
-            ->get()
-            ->map(function ($file) {
-                return [
-                    'file_id' => $file->id,
-                    'file_name' => $file->name,
-                    'file_url' => asset('storage/' . $file->path),
-                    'teacher' => optional($file->teacher->user)->first_name . ' ' . optional($file->teacher->user)->last_name,
-                    'uploaded_at' => $file->created_at->format('Y-m-d H:i'),
-                    'grades' => $file->classroom->pluck('grade.name')->unique()->values(),
-                ];
-            });
-
-        return response()->json([
-            'files' => $files
-        ]);
-    }
+    return response()->json([
+        'files' => $files
+    ]);
+}
 //_______________________________________________________________________________________________
 
     public function getFilesByTeacherId($teacher_id)

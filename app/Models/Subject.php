@@ -23,7 +23,7 @@ class Subject extends Model
 
     public function teachers()
     {
-    return $this->hasMany(Teacher::class);
+    return $this->belongsToMany(Teacher::class);
     }
 
     public function homeworks()

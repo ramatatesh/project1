@@ -10,7 +10,7 @@ class File extends Model
 {
     use HasFactory, SoftDeletes;
 
-    protected $fillable = ['teacher_id','name', 'path'];
+    protected $fillable = ['teacher_id','name', 'path','subject_id'];
 
     public function classroom()
     {

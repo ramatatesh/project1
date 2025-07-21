@@ -20,6 +20,7 @@ use App\Http\Controllers\MarkController;
 use App\Http\Controllers\HomeworkController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Services\FirebaseService;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -36,7 +37,7 @@ Route::post('updateStudent/{userId}',[StudentController::class,'updateStudent'])
 Route::delete('destroyStudent/{userId}',[StudentController::class,'destroyStudent']);
 Route::get('showStudent',[StudentController::class,'showStudent'])->middleware('auth:sanctum');;
 Route::put('updateAccount',[UserController::class,'updateAccount']);
-Route::post('deleteUser',[UserController::class,'deleteUser']);
+Route::delete('deleteUser',[UserController::class,'deleteUser']);
 Route::post('addTeacher',[TeacherController::class,'addTeacher']);
 Route::post('updateTeacher/{userId}',[TeacherController::class,'updateTeacher']);
 Route::delete('destroyTeacher/{userId}',[TeacherController::class,'destroyTeacher']);
@@ -107,3 +108,6 @@ Route::delete('deleteHomework/{id}', [HomeworkController::class, 'deleteHomework
 Route::get('getHomeworksByClassroomAndSubject/{classroom_id}/{subject_id}', [HomeworkController::class, 'getHomeworksByClassroomAndSubject']);
 Route::get('getStudentHomeworks', [HomeworkController::class, 'getStudentHomeworks'])->middleware('auth:sanctum');
 Route::get('showTeacher',[TeacherController::class,'showTeacher'])->middleware('auth:sanctum');
+
+Route::post('updateFcmToken',[StudentController::class,'updateFcmToken'])->middleware('auth:sanctum');
+

@@ -123,7 +123,7 @@ class TeacherController extends Controller
 
     //تابع جلب المعلمين حسب المادة
     public function getTeachersBySubject($subject_id)
-    {
+{
     $subject = Subject::with('teachers')->find($subject_id);
 
     if (!$subject) {
@@ -134,7 +134,7 @@ class TeacherController extends Controller
         'subject' => $subject->name,
         'teachers' => $subject->teachers,
     ]);
-    }
+}
 
     //____________________________________________________________________________________________
 
