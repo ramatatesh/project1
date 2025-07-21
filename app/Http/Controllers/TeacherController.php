@@ -166,24 +166,26 @@ class TeacherController extends Controller
     }
 //___________________________________________________________________________________________
 
-    public function showTeacher(Request $request)
-    {
-        $user = Auth::user();
+   public function showTeacher(Request $request)
+{
+    $user = Auth::user();
 
-        if (!$user) {
-            return response()->json(["message" => "User not authenticated"], 401);
-        }
-
-        $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
-        if (!$teacher) {
-            return response()->json(["message" => "المعلم غير موجود"], 404);
-        }
-
-        return response()->json([
-            'message' => 'تم جلب بيانات المعلم بنجاح',
-            'teacher' => $teacher
-        ], 200);
+    if (!$user) {
+        return response()->json(["message" => "User not authenticated"], 401);
     }
+
+    $teacher = Teacher::with(['user', 'subjects'])->where('user_id', $user->id)->first();
+
+    if (!$teacher) {
+        return response()->json(["message" => "المعلم غير موجود"], 404);
+    }
+
+    return response()->json([
+        'message' => 'تم جلب بيانات المعلم بنجاح',
+        'teacher' => $teacher
+    ], 200);
+}
+
 
 
 }
