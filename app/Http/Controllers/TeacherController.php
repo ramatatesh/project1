@@ -122,17 +122,24 @@ class TeacherController extends Controller
 
 
     //تابع جلب المعلمين حسب المادة
-    public function getTeachersBySubject($subject_id)
+   public function getTeachersBySubject($subject_id)
 {
-    $subject = Subject::with('teachers')->find($subject_id);
+    $subject = Subject::with(['teachers.user'])->find($subject_id);
 
     if (!$subject) {
         return response()->json(['message' => 'المادة غير موجودة.'], 404);
     }
 
+    $teachers = $subject->teachers->map(function ($teacher) {
+        return [
+            'teacher_id' => $teacher->id,
+            'username' => $teacher->user->username
+        ];
+    });
+
     return response()->json([
         'subject' => $subject->name,
-        'teachers' => $subject->teachers,
+        'teachers' => $teachers,
     ]);
 }
 
