@@ -152,6 +152,7 @@ class TeacherController extends Controller
         $formatted = $teachers->map(function ($teacher) {
             return [
                 'id' => $teacher->id,
+                'user_id' => $teacher->user->id, // ✅ إضافة user_id
                 'username' => $teacher->user->username,
                 'first_name' => $teacher->user->first_name,
                 'last_name' => $teacher->user->last_name,
@@ -165,12 +166,13 @@ class TeacherController extends Controller
                 'nationality' => $teacher->user->nationality,
                 'specialization' => $teacher->specialization,
                 'start_date' => $teacher->start_date,
-                'subjects' => $teacher->subjects->pluck('name'), // إرجاع أسماء المواد كمصفوفة
+                'subjects' => $teacher->subjects->pluck('name'),
             ];
         });
 
         return response()->json($formatted);
     }
+
 //___________________________________________________________________________________________
 
    public function showTeacher(Request $request)
