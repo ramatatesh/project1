@@ -144,7 +144,7 @@ class TeacherController extends Controller
 }
 
     //____________________________________________________________________________________________
-
+    // عرض كل المعلمين
     public function getTeacher()
     {
         $teachers = Teacher::with(['user', 'subjects:id,name'])->get();
@@ -174,7 +174,7 @@ class TeacherController extends Controller
     }
 
 //___________________________________________________________________________________________
-
+   // عرض الملف الشخصي للمعلم
    public function showTeacher(Request $request)
 {
     $user = Auth::user();
