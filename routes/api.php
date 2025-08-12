@@ -26,7 +26,11 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::post('login',[UserController::class,'login']);
+Route::middleware('setNewLocale')->group(function () {
+    Route::post('login',[UserController::class,'login']);
+});
+
+
 Route::post('logout',[UserController::class,'logout'])->middleware('auth:sanctum');
 Route::post('forgetPassword',[UserController::class,'forgetPassword']);
 Route::post('userCheckCode',[UserController::class,'userCheckCode']);

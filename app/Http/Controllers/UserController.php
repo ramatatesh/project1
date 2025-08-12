@@ -9,6 +9,7 @@ use App\Models\ResetCodePassword;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
@@ -26,17 +27,17 @@ class UserController extends Controller
             'password'=>'required|string|min:8'
         ]);
 
+
         if(!Auth::attempt($request->only('username','password')))
             return response()->json([
-                'message'=>'invalid username'],401);
+                'message' => __('app.invalid_credentials'),],401);
         $user= User::where('username',$request->username)->FirstOrFail();
         $token= $user->createToken('auth_Token')->plainTextToken;
 
         return response()->json([
-                'message'=>'Login Successfully',
+                'message' => __('app.login_success'),
                 'User'=>$user,
                 'Token'=>$token,
-             //   'role'=>$user->role,
                 ]
             ,201);
     }
@@ -45,7 +46,7 @@ class UserController extends Controller
     public function logout(Request $request){
         $request->user()->currentAccessToken()->delete();
         return response()->json([
-            'message'=>'Logout Successful'],201);
+            'message'=>__('app.Logout Successful')],201);
 
     }
     //________________________________________________________________________________________________________
