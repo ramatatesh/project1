@@ -8,5 +8,6 @@ return [
     'expired' => 'انتهت صلاحية الكود',
     'check_password' => 'الكود محقق',
     'reset'=>'الكود أو الإيميل غير محققين',
-    'reset_success'=>'passwords.reset_success',
+    'reset_success'=>'تمت إعادة تعيين كلمة المرور بنجاح',
+    'unauthenticated' => 'غير مصرح لك بتنفيذ هذا الإجراء.',
 ];

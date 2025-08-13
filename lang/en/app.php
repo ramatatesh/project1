@@ -8,5 +8,6 @@ return [
     'expired' => 'passwords.code_is_expire',
     'check_password' => 'passwords.code_is_valid',
     'reset'=>'passwords.code_or_email_invalid',
-    'reset_success'=>'تمت إعادة تعيين كلمة المرور بنجاح',
+    'reset_success'=>'passwords.reset_success',
+    'unauthenticated' => 'Unauthenticated.',
 ];
