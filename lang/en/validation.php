@@ -163,8 +163,18 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'email' => [
+            'required' => 'The email field is required.',
+            'email'    => 'Please provide a valid email address.',
+        ],
+        'code' => [
+            'required' => 'The code field is required.',
+            'exists'   => 'The provided code is invalid or does not exist.',
+        ],
+        'password' => [
+            'required'  => 'The password field is required.',
+            'min'       => 'The password must be at least :min characters.',
+            'confirmed' => 'The password confirmation does not match.',
         ],
     ],
 

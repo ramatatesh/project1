@@ -28,14 +28,15 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('setNewLocale')->group(function () {
     Route::post('login',[UserController::class,'login']);
+    Route::post('logout',[UserController::class,'logout'])->middleware('auth:sanctum');
+    Route::post('forgetPassword',[UserController::class,'forgetPassword']);
+    Route::post('userCheckCode',[UserController::class,'userCheckCode']);
+    Route::post('resetPassword',[UserController::class,'resetPassword']);
+    Route::post('addStudent',[StudentController::class,'addStudent']);
 });
 
 
-Route::post('logout',[UserController::class,'logout'])->middleware('auth:sanctum');
-Route::post('forgetPassword',[UserController::class,'forgetPassword']);
-Route::post('userCheckCode',[UserController::class,'userCheckCode']);
-Route::post('resetPassword',[UserController::class,'resetPassword']);
-Route::post('addStudent',[StudentController::class,'addStudent']);
+
 Route::get('getGrades', [GradeController::class, 'getGrades']);
 Route::post('updateStudent/{userId}',[StudentController::class,'updateStudent']);
 Route::delete('destroyStudent/{userId}',[StudentController::class,'destroyStudent']);
