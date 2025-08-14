@@ -45,7 +45,7 @@ class TeacherController extends Controller
         $teacher->subjects()->attach($validatedData['subject_ids']);
 
         return response()->json([
-            'message' => 'تم إنشاء المعلم بنجاح',
+            'message' => __('app.addTeacher'),
             'user' => $user,
             'teacher' => $teacher,
         ], 201);
@@ -59,7 +59,7 @@ class TeacherController extends Controller
 
         $user = User::with('teacher')->find($userId);
         if (!$user) {
-            return response()->json(['message' => 'المستخدم غير موجود'], 404);
+            return response()->json(['message' => __('app.user')], 404);
         }
 
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
@@ -90,32 +90,31 @@ class TeacherController extends Controller
         $user->update(array_filter($userData, fn($val) => !is_null($val)));
 
         if (!$user->teacher) {
-            return response()->json(['message' => 'لا يوجد سجل معلم مرتبط بهذا المستخدم'], 404);
+            return response()->json(['message' => __('app.NotTeacher')], 404);
         }
 
         $user->teacher->update(array_filter($teacherData, fn($val) => !is_null($val)));
 
-        // تحديث المواد التي يدرسها المعلم إن وُجدت
+
         if (isset($validatedData['subject_ids']) && is_array($validatedData['subject_ids'])) {
             $user->teacher->subjects()->sync($validatedData['subject_ids']);
         }
 
         return response()->json([
-            'message' => 'تم التحديث بنجاح',
+            'message' => __('app.update'),
             'User' => $user->load('teacher.subjects')
         ], 200);
     }
 
 
     //______________________________________________________________________________________________________
-   // تابع لحذف معلم
     public function destroyTeacher($id){
         $teacher= Teacher::find($id);
         if (!$teacher) {
-            return response()->json(['message' => 'المعلم غير موجود'], 404);
+            return response()->json(['message' => __('app.teacher')], 404);
         }
         $teacher->delete();
-        return response()->json(['message' => ' deleted successfully.'], 204);
+        return response()->json(['message' => __(' app.deleteTeacher')], 204);
     }
 
     //____________________________________________________________________________________________
@@ -127,7 +126,7 @@ class TeacherController extends Controller
     $subject = Subject::with(['teachers.user'])->find($subject_id);
 
     if (!$subject) {
-        return response()->json(['message' => 'المادة غير موجودة.'], 404);
+        return response()->json(['message' => __('app.subject')], 404);
     }
 
     $teachers = $subject->teachers->map(function ($teacher) {
@@ -180,19 +179,19 @@ class TeacherController extends Controller
     $user = Auth::user();
 
     if (!$user) {
-        return response()->json(["message" => "User not authenticated"], 401);
+        return response()->json(["message" => "app.unauthenticated"], 401);
     }
 
     $teacher = Teacher::with('user')->where('user_id', $user->id)->first();
 
     if (!$teacher) {
-        return response()->json(["message" => "المعلم غير موجود"], 404);
+        return response()->json(["message" => "app.teacher"], 404);
     }
 
     $subjectNames = $teacher->subjects()->pluck('name');
 
     return response()->json([
-        'message' => 'تم جلب بيانات المعلم بنجاح',
+        'message' => __('app.showTeacher'),
         'teacher' => $teacher,
         'subjects' => $subjectNames,
     ], 200);

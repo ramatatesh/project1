@@ -24,7 +24,7 @@ class ComplaintController extends Controller
             'description' => $request->description,
         ]);
 
-        return response()->json(['message' => 'تم إرسال الشكوى بنجاح', 'complaint' => $complaint], 200);
+        return response()->json(['message' => __('app.complaint'), 'complaint' => $complaint], 200);
     }
 //_______________________________________________________________________________________________________________
 
@@ -68,7 +68,7 @@ class ComplaintController extends Controller
         $complaint = $student->complaints()->where('id', $id)->first();
 
         if (!$complaint) {
-            return response()->json(['message' => 'الشكوى غير موجودة أو لا تتبع هذا الطالب.'], 404);
+            return response()->json(['message' => __('app.complaintNotFound')], 404);
         }
 
         // تعديل الشكوى
@@ -76,7 +76,7 @@ class ComplaintController extends Controller
             'description' => $request->description,
         ]);
 
-        return response()->json(['message' => 'تم تعديل الشكوى بنجاح', 'complaint' => $complaint], 200);
+        return response()->json(['message' => __('app.complaintUpdate'), 'complaint' => $complaint], 200);
     }
 //___________________________________________________________________________________________________________
 
@@ -93,13 +93,13 @@ class ComplaintController extends Controller
         $complaint = $student->complaints()->where('id', $id)->first();
 
         if (!$complaint) {
-            return response()->json(['message' => 'الشكوى غير موجودة أو لا تتبع هذا الطالب.'], 404);
+            return response()->json(['message' => __('app.complaintNotFound')], 404);
         }
 
         // حذف الشكوى
         $complaint->delete();
 
-        return response()->json(['message' => 'تم حذف الشكوى بنجاح'], 200);
+        return response()->json(['message' => __('app.deleteComplaint')], 200);
     }
 //_______________________________________________________________________________________________
 

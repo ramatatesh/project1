@@ -25,7 +25,7 @@ public function addStudent(StoreStudentRequest $request)
 
     if (!$grade) {
         return response()->json([
-            'message' => 'الصف الذي أدخلته غير موجود في النظام.',
+            'message' => __('app.class'),
         ], 400);
     }
 
@@ -68,7 +68,7 @@ public function addStudent(StoreStudentRequest $request)
 
     if ($availableClassrooms->isEmpty()) {
         return response()->json([
-            'message' => 'لا توجد شُعب متاحة حالياً لهذا الصف. الرجاء إنشاء شعبة جديدة.',
+            'message' => __('app.classroom'),
         ], 400);
     }
 
@@ -87,7 +87,7 @@ public function addStudent(StoreStudentRequest $request)
     ]);
 
     return response()->json([
-        'message' => 'تم تسجيل الطالب وتوزيعه على شعبة',
+        'message' => __('app.addStudent'),
         'User' => $user,
         'Student' => $student,
     ], 201);
@@ -102,7 +102,7 @@ public function addStudent(StoreStudentRequest $request)
 
         if (!$grade) {
             return response()->json([
-                'message' => 'الصف غير موجود.',
+                'message' => __('app.classNotFound'),
             ], 404);
         }
 
@@ -112,7 +112,7 @@ public function addStudent(StoreStudentRequest $request)
 
         if (!$classroom) {
             return response()->json([
-                'message' => 'الشعبة غير موجودة لهذا الصف.',
+                'message' => __('app.classroomNotFound'),
             ], 404);
         }
 
@@ -122,7 +122,7 @@ public function addStudent(StoreStudentRequest $request)
 
         if ($students->isEmpty()) {
             return response()->json([
-                'message' => 'لا يوجد طلاب في هذا الصف وهذه الشعبة.',
+                'message' => __('app.studentsNotFound'),
             ], 404);
         }
 
@@ -140,7 +140,7 @@ public function addStudent(StoreStudentRequest $request)
 
         $user = User::with('student')->find($userId);
         if (!$user) {
-            return response()->json(['message' => 'المستخدم غير موجود'], 404);
+            return response()->json(['message' => __('app.user')], 404);
         }
 
         // فقط عند وجود كلمة مرور جديدة
@@ -182,13 +182,13 @@ public function addStudent(StoreStudentRequest $request)
         $user->update($userData);
 
         if (!$user->student) {
-            return response()->json(['message' => 'لا يوجد سجل طالب مرتبط بهذا المستخدم'], 404);
+            return response()->json(['message' => __('app.NotStudent')], 404);
         }
 
         $user->student->update($studentData);
 
         return response()->json([
-            'message' => 'تم التحديث بنجاح',
+            'message' => __('app.update'),
             'User' => $user,
         ], 200);
     }
@@ -198,7 +198,7 @@ public function addStudent(StoreStudentRequest $request)
         $student = Student::find($id);
 
         if (!$student) {
-            return response()->json(['message' => 'الطالب غير موجود'], 404);
+            return response()->json(['message' => __('app.student')], 404);
         }
 
         $user = $student->user;
@@ -207,7 +207,7 @@ public function addStudent(StoreStudentRequest $request)
         } else {
             $student->delete();
         }
-        return response()->json(['message' => 'تم حذف الطالب والمستخدم بنجاح.'], 204);
+        return response()->json(['message' => __('app.deleteStudent')], 204);
     }
 
 //___________________________________________________________________________________________________________________
@@ -216,16 +216,16 @@ public function addStudent(StoreStudentRequest $request)
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json(["message" => "User not authenticated"], 401);
+            return response()->json(["message" => __("app.unauthenticated")], 401);
         }
 
         $student = Student::with('user')->where('user_id', $user->id)->first();
         if (!$student) {
-            return response()->json(["message" => "الطالب غير موجود"], 404);
+            return response()->json(["message" => __("app.student")], 404);
         }
 
         return response()->json([
-            'message' => 'تم جلب بيانات الطالب بنجاح',
+            'message' => __('app.showStudent'),
             'student' => $student
         ], 200);
     }

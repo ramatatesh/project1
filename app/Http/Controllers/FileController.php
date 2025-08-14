@@ -15,7 +15,7 @@ class FileController extends Controller
         $user = auth()->user();
 
         if (!$user || !$user->teacher) {
-            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+            return response()->json(['message' => __('app.teacher')], 404);
         }
 
         $request->validate([
@@ -25,7 +25,6 @@ class FileController extends Controller
             'subject_id' => 'required|exists:subjects,id',
         ]);
 
-        // تأكد أن المعلم يدرّس هذه المادة في هذا الصف
         $isTeachingSubject = Lesson::whereHas('weeklySchedule.classroom', function ($query) use ($request) {
             $query->where('grade_id', $request->grade_id);
         })
@@ -34,7 +33,7 @@ class FileController extends Controller
             ->exists();
 
         if (!$isTeachingSubject) {
-            return response()->json(['message' => 'المعلم لا يدرس هذه المادة في الصف المحدد.'], 403);
+            return response()->json(['message' => __('app.teacherSubject')], 403);
         }
 
         $fileUploaded = $request->file('file');
@@ -60,13 +59,13 @@ class FileController extends Controller
             ->toArray();
 
         if (empty($classroomIds)) {
-            return response()->json(['message' => 'لا توجد شعب في هذا الصف يُدرّسها المعلم لهذه المادة.'], 404);
+            return response()->json(['message' => __('app.teacherClassroom')], 404);
         }
 
         $file->classroom()->sync($classroomIds);
 
         return response()->json([
-            'message' => 'تم رفع الملف وربطه بالمادة والشعب بنجاح.',
+            'message' => __('app.file'),
             'file' => $file,
             'classroom_ids' => $classroomIds,
             'file_url' => asset('storage/' . $path),
@@ -79,13 +78,12 @@ class FileController extends Controller
         $user = auth()->user();
 
         if (!$user || !$user->teacher) {
-            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+            return response()->json(['message' => __('app.teacher')], 404);
         }
 
-        // التحقق من وجود الملف
         $file = File::find($id);
         if (!$file || $file->teacher_id != $user->teacher->id) {
-            return response()->json(['message' => 'الملف غير موجود أو لا يتبع لهذا المعلم.'], 404);
+            return response()->json(['message' => __('app.fileTeacher')], 404);
         }
 
         // التحقق من البيانات
@@ -124,7 +122,7 @@ class FileController extends Controller
             ->toArray();
 
         if (empty($classroomIds)) {
-            return response()->json(['message' => 'لا توجد شعب في هذا الصف يُدرّسها المعلم.'], 404);
+            return response()->json(['message' => __('app.classroomTeacher')], 404);
         }
 
         $file->save();
@@ -133,7 +131,7 @@ class FileController extends Controller
         $file->classroom()->sync($classroomIds);
 
         return response()->json([
-            'message' => 'تم تعديل الملف وربطه بالشعب الجديدة بنجاح.',
+            'message' => __('app.updateFile'),
             'file' => $file,
             'file_url' => asset('storage/' . $file->path),
             'classroom_ids' => $classroomIds,
@@ -146,13 +144,13 @@ class FileController extends Controller
         $user = auth()->user();
 
         if (!$user || !$user->teacher) {
-            return response()->json(['message' => 'المعلم غير موجود أو المستخدم غير معلم'], 404);
+            return response()->json(['message' => __('app.teacher')], 404);
         }
 
         $file = File::find($id);
 
         if (!$file || $file->teacher_id != $user->teacher->id) {
-            return response()->json(['message' => 'الملف غير موجود أو لا يخص هذا المعلم'], 404);
+            return response()->json(['message' => __('app.fileTeacher')], 404);
         }
 
         // إزالة العلاقة مع الشعب فقط (لا نحذف الملف من التخزين)
@@ -161,7 +159,7 @@ class FileController extends Controller
         // حذف غير نهائي (Soft Delete)
         $file->delete();
 
-        return response()->json(['message' => 'تم نقل الملف إلى سلة المحذوفات.'], 200);
+        return response()->json(['message' => __('app.fileDe')], 200);
     }
 //____________________________________________________________________________________________
 

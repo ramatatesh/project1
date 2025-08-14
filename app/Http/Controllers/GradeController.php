@@ -15,6 +15,4 @@ class GradeController extends Controller
     return response()->json([ 'grades' => $grades], 200);
 }
 
-
-//________________________________________________________________________________________
 }
