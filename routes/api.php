@@ -109,5 +109,5 @@ Route::get('getHomeworksByClassroomAndSubject/{classroom_id}/{subject_id}', [Hom
 Route::get('getStudentHomeworks', [HomeworkController::class, 'getStudentHomeworks'])->middleware('auth:sanctum');
 Route::get('showTeacher',[TeacherController::class,'showTeacher'])->middleware('auth:sanctum');
 
-Route::post('updateFcmToken',[StudentController::class,'updateFcmToken'])->middleware('auth:sanctum');
 
+Route::get('getStudentAverages',[MarkController::class,'getStudentAverages'])->middleware('auth:sanctum');

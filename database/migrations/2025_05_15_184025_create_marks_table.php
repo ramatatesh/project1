@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('mark')->nullable();
             $table->integer('max_mark');
             $table->enum('semester', ['first', 'second']);
-            $table->enum('type', ['first_exam', 'second_exam', 'final','quiz']);
+            $table->enum('type', ['exam', 'final','quiz']);
             $table->timestamps();
         });
     }
