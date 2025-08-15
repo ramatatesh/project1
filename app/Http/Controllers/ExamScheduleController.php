@@ -17,10 +17,10 @@ class ExamScheduleController extends Controller
             'exams.*.day' => 'required|in:Sunday,Monday,Tuesday,Wednesday,Thursday',
             'exams.*.subject_id' => 'required|exists:subjects,id',
             'exams.*.time' => 'required|date_format:H:i',
-            'exams.*.date' => 'required|date|after_or_equal:today', // ✅ تحقق من وجود التاريخ وصحته
+            'exams.*.date' => 'required|date|after_or_equal:today',
         ]);
 
-        // التحقق من وجود جدول مسبقًا
+
         $existingSchedule = ExamSchedule::where('grade_id', $request->grade_id)
             ->where('semester', $request->semester)
             ->first();
@@ -31,13 +31,13 @@ class ExamScheduleController extends Controller
             ], 409);
         }
 
-        // إنشاء جدول الامتحانات
+
         $schedule = ExamSchedule::create([
             'grade_id' => $request->grade_id,
             'semester' => $request->semester,
         ]);
 
-        // إدراج الامتحانات المرتبطة بالجدول
+
         foreach ($request->exams as $exam) {
             Exam::create([
                 'exam_schedule_id' => $schedule->id,
@@ -62,7 +62,7 @@ class ExamScheduleController extends Controller
 
         $student = $user->student;
 
-        // جلب جميع جداول الامتحانات المرتبطة بالصف
+
         $schedules = ExamSchedule::where('grade_id', $student->grade_id)
             ->with(['exams' => function ($query) {
                 $query->with('subject:id,name')->orderBy('day')->orderBy('time');
@@ -74,7 +74,7 @@ class ExamScheduleController extends Controller
             return response()->json(['message' => 'لا يوجد جداول امتحانات لهذا الصف.'], 404);
         }
 
-        // تنسيق كل جدول
+
         $formattedSchedules = $schedules->map(function ($schedule) {
             return [
                 'semester' => $schedule->semester,
@@ -123,6 +123,7 @@ class ExamScheduleController extends Controller
                 'subject' => $exam->subject->name ?? null,
                 'day' => $exam->day,
                 'time' => $exam->time,
+                'date' => $exam->date,
             ];
         });
 
@@ -186,7 +187,7 @@ class ExamScheduleController extends Controller
             return response()->json(['message' => 'جدول الامتحانات غير موجود.'], 404);
         }
 
-        $schedule->delete(); // سيتم حذف جميع الامتحانات المرتبطة بفضل cascadeOnDelete
+        $schedule->delete(); 
 
         return response()->json(['message' => 'تم حذف جدول الامتحانات بنجاح.']);
     }

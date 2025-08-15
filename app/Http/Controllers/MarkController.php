@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Mark;
 use App\Models\User;
 use App\Models\Student;
-
+use App\Models\Subject;
 class MarkController extends Controller
 {
     // تابع لاضافة علامات الطلاب
@@ -17,7 +17,7 @@ class MarkController extends Controller
         'classroom_id' => 'required|exists:classrooms,id',
         'subject_id' => 'required|exists:subjects,id',
         'semester' => 'required|in:first,second',
-        'type' => 'required|in:first_exam,second_exam,final,quiz',
+        'type' => 'required|in:exam,final,quiz',
         'max_mark' => 'required|numeric|min:0',
         'marks' => 'required|array',
         'marks.*.student_id' => 'required|exists:students,id',
@@ -90,7 +90,7 @@ public function showStudentsWithMarks(Request $request)
         'classroom_id' => 'required|exists:classrooms,id',
         'subject_id' => 'required|exists:subjects,id',
         'semester' => 'required|in:first,second',
-        'type' => 'required|in:first_exam,second_exam,final',
+        'type' => 'required|in:exam,final',
     ]);
 
     $students = Student::where('grade_id', $request->query('grade_id'))
@@ -117,6 +117,55 @@ public function showStudentsWithMarks(Request $request)
     ]);
 }
 //_________________________________________________________________________________
+// تابع يعرض معدل الطالب في المذاكرة والامتحان
+public function getStudentAverages(Request $request)
+{
+    $student = auth()->user()->student;
 
+    if (!$student) {
+        return response()->json(['error' => 'Student not found'], 404);
+    }
+
+
+    $marks = Mark::where('student_id', $student->id)
+        ->select('semester', 'type', 'mark', 'max_mark', 'subject_id')
+        ->get();
+
+
+    $types = [
+        'term1_exam' => ['semester' => 'first', 'type' => 'exam'],
+        'term1_final' => ['semester' => 'first', 'type' => 'final'],
+        'term2_exam' => ['semester' => 'second', 'type' => 'exam'],
+    ];
+
+    $averages = [];
+
+    foreach ($types as $key => $filter) {
+        $filteredMarks = $marks->filter(function ($mark) use ($filter) {
+            return $mark->semester == $filter['semester'] && $mark->type == $filter['type'];
+        });
+
+
+        $totalPercentage = 0;
+        $subjectsCount = Subject::count();
+
+        foreach (Subject::all() as $subject) {
+            $subjectMark = $filteredMarks->firstWhere('subject_id', $subject->id);
+
+            if ($subjectMark) {
+                $percentage = ($subjectMark->mark / $subjectMark->max_mark) * 100;
+            } else {
+                $percentage = 0;
+            }
+
+            $totalPercentage += $percentage;
+        }
+
+        $averages[$key] = round($totalPercentage / $subjectsCount, 2);
+    }
+
+    return response()->json($averages);
+}
+//_________________________________________________________________________________
 
 }
