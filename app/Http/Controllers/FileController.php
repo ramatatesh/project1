@@ -215,7 +215,6 @@ class FileController extends Controller
 
         $files = File::onlyTrashed()
             ->where('teacher_id', $user->teacher->id)
-            ->with('classroom')
             ->get();
 
         return response()->json([
