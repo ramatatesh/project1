@@ -41,7 +41,6 @@ class TeacherController extends Controller
             'start_date' => $validatedData['start_date'],
         ]);
 
-        // ربط المواد
         $teacher->subjects()->attach($validatedData['subject_ids']);
 
         return response()->json([
@@ -52,7 +51,6 @@ class TeacherController extends Controller
     }
 
     //________________________________________________________________________________________
-    // تابع لتعديل بيانات معلم
     public function updateTeacher(UpdateTeacherRequest $request, $userId)
     {
         $validatedData = $request->validated();

@@ -23,7 +23,11 @@ class UpdateStudentRequest extends FormRequest
             'phone'=>'sometimes|string|min:10',
             'password'=>'sometimes|string|min:8',
             'grade'=>'sometimes|string',
-            'address'=>'sometimes|string'
+            'address'=>'sometimes|string',
+            'first_name'=>'sometimes|string|max:255',
+            'last_name'=>'sometimes|string|max:255',
+            'nationality'=>'sometimes|string|max:255',
+
         ];
     }
 }
