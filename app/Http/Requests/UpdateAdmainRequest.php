@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class updateAdmainRequest extends FormRequest
 {
@@ -33,7 +34,7 @@ class updateAdmainRequest extends FormRequest
                 'string',
                 Rule::unique('users', 'username')->ignore($userId),
             ],
-            
+
             'first_name'=>'nullable|string|max:255',
             'last_name'=>'nullable|string|max:255',
             'father_name'=>'nullable|string|max:255',
