@@ -36,7 +36,7 @@ public function updateNews(Request $request, $id){
     }
     $news->update([
         'title' => $request->title,
-        'content' => $request->content
+        'content' => $request->input('content'),
     ]);
     return response()->json(['message' => 'تم تعديل الخبر بنجاح', 'news' => $news]);
 
