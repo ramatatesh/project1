@@ -44,65 +44,64 @@ class AdmainController extends Controller
     }
     //___________________________________________________________________________________
     public function updateAdmain(updateAdmainRequest $request, $userId)
-{
-    $validatedData = $request->validated();
+    {
+        $validatedData = $request->validated();
 
-    $user = User::with('admain')->find($userId);
-    if (!$user) {
-        return response()->json(['message' => 'المستخدم غير موجود'], 404);
+        $user = User::with('admain')->find($userId);
+        if (!$user) {
+            return response()->json(['message' => 'المستخدم غير موجود'], 404);
+        }
+
+        // فقط عند وجود كلمة مرور جديدة
+        $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
+
+        // تأكد من عدم تحديث username و email إذا لم تتغير فعليًا
+        $userData = [];
+
+        if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
+            $userData['email'] = $validatedData['email'];
+        }
+
+        if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
+            $userData['username'] = $validatedData['username'];
+        }
+
+        // باقي البيانات العادية
+        $userData += [
+            'phone' => $validatedData['phone'] ?? $user->phone,
+            'address' => $validatedData['address'] ?? $user->address,
+            'first_name' => $validatedData['first_name'] ?? $user->first_name,
+            'last_name' => $validatedData['last_name'] ?? $user->last_name,
+            'father_name' => $validatedData['father_name'] ?? $user->father_name,
+            'mother_name' => $validatedData['mother_name'] ?? $user->mother_name,
+            'gender' => $validatedData['gender'] ?? $user->gender,
+            'birth_date' => $validatedData['birth_date'] ?? $user->birth_date,
+            'nationality' => $validatedData['nationality'] ?? $user->nationality,
+        ];
+
+        if ($password) {
+            $userData['password'] = $password;
+        }
+
+        $admainData = [
+            'grade' => $validatedData['grade'] ?? $user->admain->grade,
+            'specialization' => $validatedData['specialization'] ?? $user->admain->specialization,
+        ];
+
+        // تحديث البيانات
+        $user->update($userData);
+
+        if (!$user->admain) {
+            return response()->json(['message' => 'لا يوجد سجل مشرف مرتبط بهذا المستخدم'], 404);
+        }
+
+        $user->admain->update($admainData);
+
+        return response()->json([
+            'message' => 'تم التحديث بنجاح',
+            'User' => $user,
+        ], 200);
     }
-
-    // فقط عند وجود كلمة مرور جديدة
-    $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
-
-    // تجهيز بيانات المستخدم
-    $userData = [
-        'phone' => $validatedData['phone'] ?? $user->phone,
-        'address' => $validatedData['address'] ?? $user->address,
-        'first_name' => $validatedData['first_name'] ?? $user->first_name,
-        'last_name' => $validatedData['last_name'] ?? $user->last_name,
-        'father_name' => $validatedData['father_name'] ?? $user->father_name,
-        'mother_name' => $validatedData['mother_name'] ?? $user->mother_name,
-        'gender' => $validatedData['gender'] ?? $user->gender,
-        'birth_date' => $validatedData['birth_date'] ?? $user->birth_date,
-        'nationality' => $validatedData['nationality'] ?? $user->nationality,
-    ];
-
-    // email & username فقط إذا تغيروا
-    if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
-        $userData['email'] = $validatedData['email'];
-    }
-    if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
-        $userData['username'] = $validatedData['username'];
-    }
-
-    // password
-    if ($password) {
-        $userData['password'] = $password;
-    }
-
-    // بيانات المشرف
-    $admainData = [
-        'grade' => $validatedData['grade'] ?? $user->admain->grade,
-        'specialization' => $validatedData['specialization'] ?? $user->admain->specialization,
-    ];
-
-    // تحديث البيانات
-    $user->update(array_filter($userData, fn($val) => !is_null($val)));
-
-    if (!$user->admain) {
-        return response()->json(['message' => 'لا يوجد سجل مشرف مرتبط بهذا المستخدم'], 404);
-    }
-
-    $user->admain->update(array_filter($admainData, fn($val) => !is_null($val)));
-
-    return response()->json([
-        'message' => 'تم التحديث بنجاح',
-        'User' => $user,
-    ], 200);
-}
-
-
     //__________________________________________________________________________________________________
 
     public function destroyAdmin($id){

@@ -22,19 +22,9 @@ class updateAdmainRequest extends FormRequest
      */
     public function rules(): array
     {
-        $userId = $this->route('userId');
         return [
-             'email' => [
-                'nullable',
-                'email',
-                Rule::unique('users', 'email')->ignore($userId),
-            ],
-            'username' => [
-                'nullable',
-                'string',
-                Rule::unique('users', 'username')->ignore($userId),
-            ],
-
+            'email' => 'nullable|email|unique:users,email,' . $this->userId,
+            'username' => 'nullable|string|unique:users,username,' . $this->userId,
             'first_name'=>'nullable|string|max:255',
             'last_name'=>'nullable|string|max:255',
             'father_name'=>'nullable|string|max:255',
