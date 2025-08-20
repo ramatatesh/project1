@@ -56,20 +56,18 @@ class AdmainController extends Controller
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
 
         // تأكد من عدم تحديث username و email إذا لم تتغير فعليًا
-        // $userData = [];
+        $userData = [];
 
-        // if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
-        //     $userData['email'] = $validatedData['email'];
-        // }
+        if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
+            $userData['email'] = $validatedData['email'];
+        }
 
-        // if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
-        //     $userData['username'] = $validatedData['username'];
-        // }
+        if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
+            $userData['username'] = $validatedData['username'];
+        }
 
         // باقي البيانات العادية
         $userData += [
-            'username' => $validatedData['username'] ?? $user->username,
-            'email' => $validatedData['email'] ?? $user->email,
             'phone' => $validatedData['phone'] ?? $user->phone,
             'address' => $validatedData['address'] ?? $user->address,
             'first_name' => $validatedData['first_name'] ?? $user->first_name,
