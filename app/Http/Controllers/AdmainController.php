@@ -68,6 +68,8 @@ class AdmainController extends Controller
 
         // باقي البيانات العادية
         $userData += [
+            'email' => $validatedData['email'] ?? $user->email,
+            'username' => $validatedData['username'] ?? $user->username,
             'phone' => $validatedData['phone'] ?? $user->phone,
             'address' => $validatedData['address'] ?? $user->address,
             'first_name' => $validatedData['first_name'] ?? $user->first_name,
