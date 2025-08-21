@@ -109,6 +109,7 @@ public function showStudentsWithMarks(Request $request)
             'id' => $student->id,
             'name' => $student->user->username ?? null,
             'mark' => $student->marks->first()->mark ?? null,
+            'max_mark' => $mark->max_mark ?? null,
         ];
     });
 
