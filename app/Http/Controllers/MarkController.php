@@ -9,8 +9,8 @@ use App\Models\Student;
 use App\Models\Subject;
 class MarkController extends Controller
 {
-    // تابع لاضافة علامات الطلاب
-  public function storeMarks(Request $request)
+// تابع لاضافة علامات الطلاب
+public function storeMarks(Request $request)
 {
     $request->validate([
         'grade_id' => 'required|exists:grades,id',
@@ -24,11 +24,15 @@ class MarkController extends Controller
         'marks.*.mark' => 'nullable|numeric',
     ]);
 
+   
+    $finalMaxMark = $request->max_mark;
+
     foreach ($request->marks as $markData) {
         if ($markData['mark'] !== null && $markData['mark'] !== '') {
-            if ($markData['mark'] > $request->max_mark) {
+            if ($markData['mark'] > $finalMaxMark) {
                 return response()->json([
-                    'message' => 'العلامة المدخلة للطالب ID ' . $markData['student_id'] . ' أكبر من العلامة العظمى المسموح بها (' . $request->max_mark . ').'
+                    'message' => 'العلامة المدخلة للطالب ID ' . $markData['student_id'] .
+                                ' أكبر من العلامة العظمى المسموح بها (' . $finalMaxMark . ').'
                 ], 422);
             }
 
@@ -38,7 +42,7 @@ class MarkController extends Controller
                     'subject_id' => $request->subject_id,
                     'semester' => $request->semester,
                     'type' => $request->type,
-                    'max_mark' => $request->max_mark,
+                    'max_mark' => $finalMaxMark,
                 ],
                 [
                     'mark' => $markData['mark'],
@@ -50,6 +54,7 @@ class MarkController extends Controller
 
     return response()->json(['message' => 'تم حفظ العلامات بنجاح'], 200);
 }
+
 
 
 //_________________________________________________________________________________
@@ -101,6 +106,7 @@ public function showStudentsWithMarks(Request $request)
                 $query->where('subject_id', $request->query('subject_id'))
                       ->where('semester', $request->query('semester'))
                       ->where('type', $request->query('type'));
+
             }
         ])->get();
 
@@ -109,7 +115,7 @@ public function showStudentsWithMarks(Request $request)
             'id' => $student->id,
             'name' => $student->user->username ?? null,
             'mark' => $student->marks->first()->mark ?? null,
-            'max_mark' => $mark->max_mark ?? null,
+            'max_mark' => $student->marks->first()->max_mark ?? null,
         ];
     });
 
