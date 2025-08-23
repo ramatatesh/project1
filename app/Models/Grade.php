@@ -35,4 +35,9 @@ class Grade extends Model
         return $this->belongsToMany(Subject::class);
     }
 
+    public function admins()
+    {
+    return $this->hasOne(Admin::class);
+    }
+
 }

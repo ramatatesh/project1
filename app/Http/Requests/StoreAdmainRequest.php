@@ -32,7 +32,7 @@ class StoreAdmainRequest extends FormRequest
             'phone'=>'required|string|min:10',
             'email'=>'required|string|unique:users,email',
             'password'=>'required|string|min:8',
-            'grade'=>'required|string',
+            'grade_id'=>'required|string',
             'address'=>'required|string',
             'birth_date'=>'required|date',
             'nationality'=>'required|string',

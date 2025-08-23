@@ -33,7 +33,7 @@ class AdmainController extends Controller
 
         $admains = Admain::create([
             'user_id' => $user->id,
-            'grade' => $validatedData['grade'],
+            'grade_id' => $validatedData['grade_id'],
             'specialization' => $validatedData['specialization'],
         ]);
         return response()->json([
@@ -52,10 +52,10 @@ class AdmainController extends Controller
             return response()->json(['message' => 'المستخدم غير موجود'], 404);
         }
 
-        // فقط عند وجود كلمة مرور جديدة
+
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
 
-        // تأكد من عدم تحديث username و email إذا لم تتغير فعليًا
+        
         $userData = [];
 
         if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
@@ -84,7 +84,7 @@ class AdmainController extends Controller
         }
 
         $admainData = [
-            'grade' => $validatedData['grade'] ?? $user->admain->grade,
+            'grade_id' => $validatedData['grade_id'] ?? $user->admain->grade_id,
             'specialization' => $validatedData['specialization'] ?? $user->admain->specialization,
         ];
 

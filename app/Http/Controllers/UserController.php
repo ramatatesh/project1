@@ -37,14 +37,14 @@ class UserController extends Controller
     $user = User::where('username', $request->username)->firstOrFail();
     $token = $user->createToken('auth_Token')->plainTextToken;
 
-    // جيب بيانات الأدمن إذا كان مرتبط بهالمستخدم
-    $admain = $user->admain; // العلاقة لازم تكون معرفتها بموديل User
+
+    $admain = $user->admain;
 
     return response()->json([
         'message' => __('app.login_success'),
         'User' => $user,
-        'Role' => $user->role ?? null, // إذا عندك عمود يحدد الدور
-        'Grade' => $admain ? $admain->grade : null, // بيرجع الصف إذا كان أدمن
+        'Role' => $user->role ?? null,
+        'Grade_id'  => $admain ? $admain->grade_id : null,
         'Token' => $token,
     ], 201);
 }

@@ -35,7 +35,7 @@ class updateAdmainRequest extends FormRequest
             'gender'=>'nullable|in:male,female',
             'phone'=>'nullable|string|min:10',
             'password'=>'nullable|string|min:8',
-            'grade'=>'nullable|string',
+            'grade_id'=>'nullable|string',
             'address'=>'nullable|string',
         ];
     }
