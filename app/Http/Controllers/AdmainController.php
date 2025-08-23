@@ -55,7 +55,7 @@ class AdmainController extends Controller
 
         $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
 
-        
+
         $userData = [];
 
         if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
@@ -110,7 +110,7 @@ class AdmainController extends Controller
             return response()->json(['message' => 'المشرف غير موجود'], 404);
         }
         $admin->delete();
-        return response()->json(['message' => ' deleted successfully.'], 204);
+        return response()->json(['message' => ' deleted successfully.'], 200);
     }
     //__________________________________________________________________________________________________
     public function getAdmin()
