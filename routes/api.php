@@ -67,6 +67,8 @@ Route::middleware('setNewLocale')->group(function () {
     Route::get('getStudentAbsences/{studentId}', [AttendanceController::class, 'getStudentAbsences']);
     Route::get('getStudentAbsencesMobile', [AttendanceController::class, 'getStudentAbsencesMobile'])->middleware('auth:sanctum');
     Route::get('getTeacherWeeklySchedule', [WeeklyScheduleController::class, 'getTeacherWeeklySchedule'])->middleware('auth:sanctum');
+    Route::get('getTeacherWeeklyScheduleById/{teacherId}', [WeeklyScheduleController::class, 'getTeacherWeeklyScheduleById']);
+
     Route::post('uploadFile', [FileController::class, 'uploadFile'])->middleware('auth:sanctum');
     Route::post('updateFile/{id}', [FileController::class, 'updateFile'])->middleware('auth:sanctum');
     Route::delete('deleteFile/{id}', [FileController::class, 'deleteFile'])->middleware('auth:sanctum');
