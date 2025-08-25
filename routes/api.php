@@ -109,8 +109,11 @@ Route::middleware('setNewLocale')->group(function () {
     Route::get('getHomeworksByClassroomAndSubject/{classroom_id}/{subject_id}', [HomeworkController::class, 'getHomeworksByClassroomAndSubject']);
     Route::get('getStudentHomeworks', [HomeworkController::class, 'getStudentHomeworks'])->middleware('auth:sanctum');
     Route::get('showTeacher',[TeacherController::class,'showTeacher'])->middleware('auth:sanctum');
-
     Route::get('getStudentAverages',[MarkController::class,'getStudentAverages'])->middleware('auth:sanctum');
+    
+    Route::post('addMarks',[MarkController::class,'addMarks']);
+    Route::post('updateMark',[MarkController::class,'updateMark']);
+    Route::delete('deleteMark',[MarkController::class,'deleteMark']);
 
 });
 
