@@ -283,17 +283,14 @@ public function deleteWeeklySchedule(Request $request)
     }
 
 //________________________________________________________________________________________
-// يعرض برنامج المعلم حسب رقم المعلم(للويب)
-
-    public function getTeacherWeeklyScheduleById($teacherId)
+// يعرض برنامج المعلم حسب رقم المعلم (للويب)
+public function getTeacherWeeklyScheduleById($teacherId)
 {
-
     $teacher = Teacher::with('user')->find($teacherId);
 
     if (!$teacher) {
         return response()->json(['message' => 'المعلم غير موجود'], 404);
     }
-
 
     $schedules = WeeklySchedule::whereHas('lessons', function ($query) use ($teacherId) {
         $query->where('teacher_id', $teacherId);
@@ -304,7 +301,8 @@ public function deleteWeeklySchedule(Request $request)
                 $query->where('teacher_id', $teacherId)
                     ->with([
                         'subject:id,name',
-                        'teacher.user:id,first_name,last_name'
+                        'teacher.user:id,first_name,last_name',
+                        'weeklySchedule.classroom.grade:id,name'
                     ]);
             }
         ])
@@ -314,27 +312,30 @@ public function deleteWeeklySchedule(Request $request)
         return response()->json(['message' => 'لا توجد جداول لهذا المعلم.']);
     }
 
-    $result = $schedules->map(function ($schedule) {
-        return [
-            'schedule_id' => $schedule->id,
-            'semester' => $schedule->semester,
-            'grade' => $schedule->classroom->grade->name ?? null,
-            'classroom' => $schedule->classroom->name ?? null,
-            'lessons' => $schedule->lessons->map(function ($lesson) {
-                return [
-                    'day' => $lesson->day,
-                    'time' => $lesson->time,
-                    'subject' => $lesson->subject->name ?? null,
-                    'teacher' => $lesson->teacher && $lesson->teacher->user
-                        ? $lesson->teacher->user->first_name . ' ' . $lesson->teacher->user->last_name
-                        : null,
-                ];
-            }),
-        ];
-    });
+    $teacherName = $teacher->user
+        ? $teacher->user->first_name . ' ' . $teacher->user->last_name
+        : null;
+
+    $lessons = $schedules->flatMap(function ($schedule) {
+        return $schedule->lessons->map(function ($lesson) use ($schedule) {
+            return [
+                'day' => $lesson->day,
+                'time' => $lesson->time,
+                'subject' => $lesson->subject->name ?? null,
+                'grade' => $schedule->classroom->grade->name ?? null,
+                'classroom' => $schedule->classroom->name ?? null,
+            ];
+        });
+    })->values();
+
+    $result = [
+        'teacher' => $teacherName,
+        'lessons' => $lessons
+    ];
 
     return response()->json($result);
 }
+
 
 
 }
