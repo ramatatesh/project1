@@ -10,35 +10,45 @@ class AttendanceController extends Controller
 {
     // تابع لتسجيل غيابات شعبة معينة
     public function takeAbsences(Request $request)
-{
-    $request->validate([
-        'grade_id' => 'required|exists:grades,id',
-        'classroom_id' => 'required|exists:classrooms,id',
-        'date' => 'required|date',
-        'absent_student_ids' => 'required|array',
-        'absent_student_ids.*' => 'exists:students,id',
-    ]);
+    {
+        $request->validate([
+            'grade_id' => 'required|exists:grades,id',
+            'classroom_id' => 'required|exists:classrooms,id',
+            'date' => 'required|date',
+            'absent_student_ids' => 'required|array',
+            'absent_student_ids.*' => 'exists:students,id',
+        ]);
 
+        // ✅ التحقق إذا كان التفقد تم إدخاله مسبقاً لهذا الصف وهذا التاريخ
+        $alreadyTaken = Attendance::where('classroom_id', $request->classroom_id)
+            ->whereDate('date', $request->date)
+            ->exists();
 
-    $students = Student::where('classroom_id', $request->classroom_id)->get();
+        if ($alreadyTaken) {
+            return response()->json([
+                'message' => '⚠️ تم إدخال التفقد مسبقاً لهذا الصف في هذا اليوم.'
+            ], 422);
+        }
 
-    foreach ($students as $student) {
-        $status = in_array($student->id, $request->absent_student_ids) ? 'absent' : 'present';
+        // ✅ جلب جميع طلاب الشعبة
+        $students = Student::where('classroom_id', $request->classroom_id)->get();
 
-        Attendance::updateOrCreate(
-            [
+        foreach ($students as $student) {
+            $status = in_array($student->id, $request->absent_student_ids) ? 'absent' : 'present';
+
+            Attendance::create([
                 'student_id' => $student->id,
                 'date' => $request->date,
-            ],
-            [
                 'status' => $status,
                 'classroom_id' => $request->classroom_id,
-            ]
-        );
+            ]);
+        }
+
+        return response()->json([
+            'message' => '✅ تم تسجيل الغياب لهذا اليوم، وتم اعتبار الباقين حاضرين تلقائياً'
+        ], 201);
     }
 
-    return response()->json(['message' => 'تم تسجيل الغياب لهذا اليوم، وتم اعتبار الباقين حاضرين تلقائياً']);
-}
 
 //_________________________________________________________________________________________________
 
