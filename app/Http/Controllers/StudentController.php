@@ -48,7 +48,8 @@ public function addStudent(StoreStudentRequest $request)
 
     $grade = Grade::firstOrCreate(['name' => $validatedData['grade']]);
 
-    $classrooms = Classroom::where('grade_id', $grade->id)->get();
+
+    $classrooms = Classroom::where('grade_id', $grade->id)->orderBy('name')->get();
 
     if ($classrooms->count() === 0) {
         foreach (['A', 'B', 'C', 'D'] as $name) {
@@ -57,25 +58,20 @@ public function addStudent(StoreStudentRequest $request)
                 'name' => $name,
             ]);
         }
-
-        $classrooms = Classroom::where('grade_id', $grade->id)->get();
+        $classrooms = Classroom::where('grade_id', $grade->id)->orderBy('name')->get();
     }
 
+    $targetClassroom = null;
+    foreach ($classrooms as $classroom) {
+        if ($classroom->students()->count() < 35) {
+            $targetClassroom = $classroom;
+            break;
+        }}
 
-    $availableClassrooms = $classrooms->filter(function ($classroom) {
-        return $classroom->students()->count() < 35;
-    });
-
-    if ($availableClassrooms->isEmpty()) {
+    if (!$targetClassroom) {
         return response()->json([
             'message' => __('app.classroom'),
-        ], 400);
-    }
-
-
-    $targetClassroom = $availableClassrooms->sortBy(function ($classroom) {
-        return $classroom->students()->count();
-    })->first();
+        ], 400);}
 
 
     $student = Student::create([
@@ -230,46 +226,7 @@ public function addStudent(StoreStudentRequest $request)
         ], 200);
     }
 //_____________________________________________________________________________________________________
-// توابع الاشعارات
-    // تابع لحفظ توكن الطالب بالداتا بيز
-    public function updateFcmToken(Request $request)
-{
-    $request->validate([
-        'fcm_token' => 'required|string',
-    ]);
 
-
-    $student = auth()->user();
-
-    $student->fcm_token = $request->fcm_token;
-    $student->save();
-
-    return response()->json(['message' => 'تم تحديث التوكن بنجاح']);
-}
-
-
-public function sendNotificationToSelf()
-{
-    $student = auth()->user();
-
-    if (!$student->fcm_token) {
-        return response()->json(['error' => 'لا يوجد FCM Token لهذا الطالب'], 400);
-    }
-
-    $firebase = new FirebaseService();
-
-    try {
-        $firebase->sendNotificationToDevice(
-            $student->fcm_token,
-            'تنبيه',
-            'هذا إشعار موجه لك شخصيًا 🤓'
-        );
-
-        return response()->json(['message' => 'تم إرسال الإشعار']);
-    } catch (\Exception $e) {
-        return response()->json(['error' => 'فشل الإرسال: ' . $e->getMessage()], 500);
-    }
-}
 
 }
 

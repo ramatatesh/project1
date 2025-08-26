@@ -21,26 +21,33 @@ use App\Models\Student;
 class UserController extends Controller
 {
 
-    public function login(Request $request){
-        $request->validate([
-            'username'=>'required|string',
-            'password'=>'required|string|min:8'
-        ]);
+   public function login(Request $request)
+{
+    $request->validate([
+        'username' => 'required|string',
+        'password' => 'required|string|min:8'
+    ]);
 
-
-        if(!Auth::attempt($request->only('username','password')))
-            return response()->json([
-                'message' => __('app.invalid_credentials'),],401);
-        $user= User::where('username',$request->username)->FirstOrFail();
-        $token= $user->createToken('auth_Token')->plainTextToken;
-
+    if (!Auth::attempt($request->only('username', 'password'))) {
         return response()->json([
-                'message' => __('app.login_success'),
-                'User'=>$user,
-                'Token'=>$token,
-                ]
-            ,201);
+            'message' => __('app.invalid_credentials'),
+        ], 401);
     }
+
+    $user = User::where('username', $request->username)->firstOrFail();
+    $token = $user->createToken('auth_Token')->plainTextToken;
+
+
+    $admain = $user->admain;
+
+    return response()->json([
+        'message' => __('app.login_success'),
+        'User' => $user,
+        'Role' => $user->role ?? null,
+        'Grade_id'  => $admain ? $admain->grade_id : null,
+        'Token' => $token,
+    ], 201);
+}
 
 //____________________________________________________________________________________________________________
     public function logout(Request $request){
