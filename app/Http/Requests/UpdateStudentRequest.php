@@ -22,7 +22,7 @@ class UpdateStudentRequest extends FormRequest
             'gender'=>'sometimes|in:male,female',
             'phone'=>'sometimes|string|min:10',
             'password'=>'sometimes|string|min:8',
-            'grade'=>'sometimes|string',
+            'grade_id'=>'sometimes|string',
             'address'=>'sometimes|string',
             'first_name'=>'sometimes|string|max:255',
             'last_name'=>'sometimes|string|max:255',

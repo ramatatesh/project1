@@ -131,63 +131,70 @@ public function addStudent(StoreStudentRequest $request)
 
 //________________________________________________________________________________________
     public function updateStudent(UpdateStudentRequest $request, $userId)
-    {
-        $validatedData = $request->validated();
+{
+    $validatedData = $request->validated();
 
-        $user = User::with('student')->find($userId);
-        if (!$user) {
-            return response()->json(['message' => __('app.user')], 404);
-        }
-
-        // فقط عند وجود كلمة مرور جديدة
-        $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
-
-        // بناء البيانات فقط إذا تغيّرت عن القديمة
-        $userData = [];
-
-        if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
-            $userData['email'] = $validatedData['email'];
-        }
-
-        if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
-            $userData['username'] = $validatedData['username'];
-        }
-
-        // باقي البيانات الاعتيادية
-        $userData += [
-            'phone' => $validatedData['phone'] ?? $user->phone,
-            'address' => $validatedData['address'] ?? $user->address,
-            'first_name' => $validatedData['first_name'] ?? $user->first_name,
-            'last_name' => $validatedData['last_name'] ?? $user->last_name,
-            'father_name' => $validatedData['father_name'] ?? $user->father_name,
-            'mother_name' => $validatedData['mother_name'] ?? $user->mother_name,
-            'gender' => $validatedData['gender'] ?? $user->gender,
-            'birth_date' => $validatedData['birth_date'] ?? $user->birth_date,
-            'nationality' => $validatedData['nationality'] ?? $user->nationality,
-        ];
-
-        if ($password) {
-            $userData['password'] = $password;
-        }
-
-        $studentData = [
-            'grade' => $validatedData['grade'] ?? $user->student->grade,
-        ];
-
-        // تحديث البيانات
-        $user->update($userData);
-
-        if (!$user->student) {
-            return response()->json(['message' => __('app.NotStudent')], 404);
-        }
-
-        $user->student->update($studentData);
-
-        return response()->json([
-            'message' => __('app.update'),
-            'User' => $user,
-        ], 200);
+    $user = User::with('student')->find($userId);
+    if (!$user) {
+        return response()->json(['message' => __('app.user')], 404);
     }
+
+
+    $password = isset($validatedData['password']) ? Hash::make($validatedData['password']) : null;
+
+    $userData = [];
+
+    if (isset($validatedData['email']) && $validatedData['email'] !== $user->email) {
+        $userData['email'] = $validatedData['email'];
+    }
+
+    if (isset($validatedData['username']) && $validatedData['username'] !== $user->username) {
+        $userData['username'] = $validatedData['username'];
+    }
+
+    $userData += [
+        'phone'       => $validatedData['phone'] ?? $user->phone,
+        'address'     => $validatedData['address'] ?? $user->address,
+        'first_name'  => $validatedData['first_name'] ?? $user->first_name,
+        'last_name'   => $validatedData['last_name'] ?? $user->last_name,
+        'father_name' => $validatedData['father_name'] ?? $user->father_name,
+        'mother_name' => $validatedData['mother_name'] ?? $user->mother_name,
+        'gender'      => $validatedData['gender'] ?? $user->gender,
+        'birth_date'  => $validatedData['birth_date'] ?? $user->birth_date,
+        'nationality' => $validatedData['nationality'] ?? $user->nationality,
+    ];
+
+    if ($password) {
+        $userData['password'] = $password;
+    }
+
+    $studentData = [];
+
+    if (isset($validatedData['grade_id'])) {
+        $studentData['grade_id'] = $validatedData['grade_id'];
+
+        $grade = \App\Models\Grade::find($validatedData['grade_id']);
+        if ($grade) {
+            $studentData['grade'] = $grade->name;
+        }
+    }
+
+
+    $user->update($userData);
+
+    if (!$user->student) {
+        return response()->json(['message' => __('app.NotStudent')], 404);
+    }
+
+   
+    $user->student->update($studentData);
+
+    return response()->json([
+        'message' => __('app.update'),
+        'User'    => $user->load('student'),
+    ], 200);
+}
+
 //____________________________________________________________________________________________________
     public function destroyStudent($id)
     {
