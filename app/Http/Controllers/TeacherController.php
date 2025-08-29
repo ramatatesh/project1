@@ -119,7 +119,8 @@ class TeacherController extends Controller
 
 
     //تابع جلب المعلمين حسب المادة
-   public function getTeachersBySubject($subject_id)
+
+ public function getTeachersBySubject($subject_id)
 {
     $subject = Subject::with(['teachers.user'])->find($subject_id);
 
@@ -130,7 +131,8 @@ class TeacherController extends Controller
     $teachers = $subject->teachers->map(function ($teacher) {
         return [
             'teacher_id' => $teacher->id,
-            'username' => $teacher->user->username
+            'first_name' => $teacher->user->first_name,
+            'last_name' => $teacher->user->last_name
         ];
     });
 
