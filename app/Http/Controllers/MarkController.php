@@ -9,8 +9,13 @@ use App\Models\Student;
 use App\Models\Subject;
 class MarkController extends Controller
 {
+<<<<<<< HEAD
+
+  public function storeMarks(Request $request)
+=======
 // تابع لاضافة علامات الطلاب
 public function storeMarks(Request $request)
+>>>>>>> d0846f76a4cbb97dbe4b65afd56c57e74845d093
 {
     $request->validate([
         'grade_id' => 'required|exists:grades,id',
@@ -58,7 +63,7 @@ public function storeMarks(Request $request)
 
 
 //_________________________________________________________________________________
-// تابع عرض علامات طالب معين حسب التوكن
+
 public function getStudentMarks()
 {
     $student = auth()->user()->student;
@@ -87,7 +92,6 @@ public function getStudentMarks()
     return response()->json(['marks' => $marks]);
 }
 //_________________________________________________________________________________
-//تابع يعرض الطلاب وعلاماتهم(للويب)
 public function showStudentsWithMarks(Request $request)
 {
     $request->validate([
@@ -124,7 +128,6 @@ public function showStudentsWithMarks(Request $request)
     ]);
 }
 //_________________________________________________________________________________
-// تابع يعرض معدل الطالب في المذاكرة والامتحان
 public function getStudentAverages(Request $request)
 {
     $student = auth()->user()->student;
