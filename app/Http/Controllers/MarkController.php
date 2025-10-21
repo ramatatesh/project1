@@ -9,13 +9,10 @@ use App\Models\Student;
 use App\Models\Subject;
 class MarkController extends Controller
 {
-<<<<<<< HEAD
 
-  public function storeMarks(Request $request)
-=======
 // تابع لاضافة علامات الطلاب
 public function storeMarks(Request $request)
->>>>>>> d0846f76a4cbb97dbe4b65afd56c57e74845d093
+
 {
     $request->validate([
         'grade_id' => 'required|exists:grades,id',

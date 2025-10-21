@@ -16,7 +16,8 @@ class User extends Authenticatable
     use HasFactory, Notifiable,HasApiTokens;
 
     protected $fillable = ['username','father_name','mother_name','email','password',
-    'role','phone','address','gender','birth_date','nationality','first_name','last_name',];
+    'role','phone','address','gender','birth_date','nationality','first_name','last_name','fcm_token',];
+
     protected $table = 'users';
 
     protected function casts(): array

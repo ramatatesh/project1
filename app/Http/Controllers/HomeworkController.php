@@ -10,8 +10,7 @@ use App\Services\FirebaseService;
 
 class HomeworkController extends Controller
 {
-    //تابع انشاء واجب لشعبة معينة
- // تابع إنشاء واجب لشعبة معينة
+
 public function addHomework(Request $request)
 {
     $request->validate([
@@ -23,7 +22,7 @@ public function addHomework(Request $request)
     $homework = Homework::create([
         'classroom_id' => $request->classroom_id,
         'subject_id' => $request->subject_id,
-        'content' => $request->content,
+        'content' => $request->input('content'),
     ]);
 
     return response()->json([
