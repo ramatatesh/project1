@@ -1,7 +1,7 @@
 # استخدم صورة PHP الرسمية مع Apache
 FROM php:8.2-apache
 
-# إعدادات النظام الأساسية + تثبيت الامتدادات اللازمة
+# تثبيت الحزم المطلوبة وامتدادات PHP الضرورية
 RUN apt-get update && apt-get install -y \
     git \
     zip \
@@ -33,11 +33,11 @@ RUN composer install --no-dev --optimize-autoloader
 # إعطاء صلاحيات التخزين والتخزين المؤقت
 RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# تفعيل .htaccess (ضروري لتوجيه Laravel)
+# تعديل إعداد Apache ليوجّه إلى مجلد public
 RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
 
-# المنفذ الذي يستمع عليه التطبيق (Railway يقرأ من متغير PORT)
+# المنفذ الذي يستمع عليه التطبيق (Railway يستخدمه تلقائياً)
 EXPOSE 80
 
-# أمر التشغيل الافتراضي
+# تشغيل Apache
 CMD ["apache2-foreground"]
