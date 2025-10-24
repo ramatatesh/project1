@@ -1,18 +1,19 @@
 # استخدم صورة PHP الرسمية مع Apache
 FROM php:8.2-apache
 
-# إعدادات النظام الأساسية
+# إعدادات النظام الأساسية + تثبيت الامتدادات اللازمة
 RUN apt-get update && apt-get install -y \
     git \
     zip \
     unzip \
+    libzip-dev \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
     libonig-dev \
     libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql mbstring exif pcntl bcmath opcache
+    && docker-php-ext-install gd zip pdo pdo_mysql mbstring exif pcntl bcmath opcache
 
 # تمكين Apache Rewrite Module (مطلوب لـ Laravel routes)
 RUN a2enmod rewrite
